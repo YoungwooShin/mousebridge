@@ -2,6 +2,10 @@ name: Build and verify
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "verification/**"
   pull_request:
   workflow_dispatch:
 permissions:

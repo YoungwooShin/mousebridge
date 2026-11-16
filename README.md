@@ -11,7 +11,7 @@ Get the current **v0.3.0** downloads on the [website](https://youngwooshin.githu
 | Pairing | Implementation | Verification |
 | --- | --- | --- |
 | Windows → Windows | Main and Secondary, custom shortcuts, edge handoff, text clipboard | Earlier user hardware tests confirmed input sharing; new indicator UI still requires Windows testing |
-| Windows ↔ Mac | Both Main/Secondary roles implemented using common RFCOMM protocol | Universal Mac cross-build completed; **not hardware-tested** |
+| Windows ↔ Mac | Both Main/Secondary roles implemented using common RFCOMM protocol | Native universal Mac CI build/signature verification completed; **not hardware-tested** |
 | Mac → Mac | Same Mac app on both computers, one Main and one Secondary | **Not hardware-tested** |
 
 This is an experimental, unsigned/ad-hoc signed prototype, not a security-reviewed remote administration product. macOS support is an experimental port with feature gaps, not feature parity. See [Mac instructions](macos/README.md) and [security](SECURITY.md).
@@ -62,7 +62,7 @@ macOS (Xcode command line tools):
 
 The Mac app uses native AppKit, IOBluetooth and CoreGraphics. The common wire format retains a transport interface on Windows; no WebSocket relay is implemented. Both current apps use input protocol 3.
 
-**Verified here:** Windows Release build with 0 warnings/errors and **111 passing xUnit tests**; compressed self-contained publish; portable Mac C wire tests under AddressSanitizer/UndefinedBehaviorSanitizer; Linux cross-compilation/linking of both Mac architectures and universal package inspection. **Not verified here:** actual Windows new UI/color dialog/DPI and Mac app launch, TCC permissions, Bluetooth interoperability/input/IME behavior. Added CI is a build definition, not proof of a completed CI run.
+**Verified here:** Windows Release build with 0 warnings/errors and **111 passing xUnit tests**; compressed self-contained publish; portable Mac C wire tests under AddressSanitizer/UndefinedBehaviorSanitizer; Linux cross-compilation/linking plus successful native Windows/macOS CI builds and Apple ad-hoc signature verification. **Not verified here:** actual Windows new UI/color dialog/DPI and Mac app launch, TCC permissions, Bluetooth interoperability/input/IME behavior. [Native CI completed successfully](https://github.com/YoungwooShin/mousebridge/actions/runs/43866604334). No app GUI launch or Bluetooth hardware test was performed.
 
 ## Scope and contributing
 

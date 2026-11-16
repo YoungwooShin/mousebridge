@@ -9,7 +9,7 @@
 [배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 v0.3.0을 받습니다.
 
 - **Windows ↔ Windows:** 기존 시제품. 무설치 ZIP에 `MouseBridge.exe` 하나만 있습니다. 새 경계 표시 UI는 실제 Windows 확인이 필요합니다.
-- **Mac ↔ Windows, Mac ↔ Mac:** 양쪽 역할을 구현한 실험적 Mac 포트입니다. Apple silicon·Intel 통합 앱을 크로스 빌드했으나, 실제 Mac 실행·블루투스·입력 동작은 아직 검증하지 못했습니다.
+- **Mac ↔ Windows, Mac ↔ Mac:** 양쪽 역할을 구현한 실험적 Mac 포트입니다. Apple silicon·Intel 통합 앱의 네이티브 CI 빌드와 임시 서명 검사를 통과했으나, 실제 Mac 실행·블루투스·입력 동작은 아직 검증하지 못했습니다.
 - 소스 ZIP과 SHA-256 체크섬도 제공합니다. Windows는 서명되지 않았고, Mac은 임시 서명으로 Developer ID 서명·Apple 공증이 없습니다. 운영체제의 정상 확인 절차를 사용하고 보안 기능을 끄지 마세요.
 
 ## Windows 사용법
@@ -34,7 +34,7 @@ Mac은 현재 F8 고정, 수동 재연결, 좌우 선택 메뉴를 사용합니�
 
 ## 검증과 보안
 
-Windows 빌드 경고·오류 0개, 단위 테스트 **111개 통과**. Mac의 C 통신 검증 테스트와 Apple silicon·Intel 크로스 빌드·패키지 검사를 수행했습니다. Mac에서 앱을 실행한 결과나 두 장치 간 호환성을 확인한 결과는 아닙니다. [테스트 결과](TEST-RESULTS.md)에 실제 장치 확인 항목을 구분했습니다.
+Windows 빌드 경고·오류 0개, 단위 테스트 **111개 통과**. Mac의 C 통신 검증 테스트, Apple silicon·Intel 네이티브 CI 빌드와 임시 서명 검사를 수행했습니다. Mac에서 앱을 실행한 결과나 두 장치 간 호환성을 확인한 결과는 아닙니다. [테스트 결과](TEST-RESULTS.md)에 실제 장치 확인 항목을 구분했습니다.
 
 신뢰하는 기기끼리만 사용하세요. 전환 시 민감한 클립보드 텍스트도 전달될 수 있으며 회사 정책을 지켜야 합니다. 관리자 앱, 로그인·보안 화면 등은 지원 범위 밖이고 보안 감사를 완료한 제품이 아닙니다. 설정과 로그는 Windows의 `%LOCALAPPDATA%\MouseBridge`에 남습니다.
 

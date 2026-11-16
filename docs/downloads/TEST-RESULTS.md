@@ -1,6 +1,16 @@
 # MouseBridge v0.3.0 verification
 
-## Verified in this Linux environment
+## Native GitHub Actions verification (2026-11-16)
+
+[Successful native build run](https://github.com/YoungwooShin/mousebridge/actions/runs/43866604334), source commit `1f73ff9a28fe4191e50f1abf555be37672bd0c8f`:
+
+- Windows hosted runner: Release build 0 warnings/errors, xUnit111 passed, self-contained portable publish/upload succeeded.
+- macOS26 hosted runner: C wire tests passed; Apple clang built arm64 and x86_64; lipo created the universal app; Apple's ad-hoc codesign and codesign --verify --deep --strict succeeded.
+- The GitHub Pages Mac ZIP now uses that native CI artifact (inner ZIP SHA256 `74b270e5f60b8509bcccff66a2f28cab6b73dd1d0aa8816d26dd1af44c55a998`). No Developer ID signing or notarization.
+- No app GUI launch, Accessibility/Input Monitoring consent, Bluetooth radio/interoperability, real input injection or IME test was run on the hosted runners.
+- Public GitHub Pages English/Korean HTML and downloads returned HTTP200; local links, ZIP CRC and checksums checked. Browser visual testing remains unverified.
+
+## Earlier Linux verification (historical cross-build)
 
 - Windows .NET Release solution build: **PASS, 0 warnings / 0 errors**.
 - Hardware-independent xUnit tests: **111 passed / 0 failed / 0 skipped**. Includes framing, leases, input queue/encoding, clipboard, exact shortcut handling, edge geometry/proportional height, settings color/opacity/width validation and old settings defaulting to width50.
@@ -24,4 +34,4 @@
 7. Mac monitor coordinate mapping/Retina/scaling/hotplug and strip placement. The Mac default strip is 50 logical points; Windows widths are physical pixels.
 8. Normal-user apps versus unsupported elevated/secure/login contexts. No secure-input bypass or security audit is claimed.
 
-Adding `.github/workflows/build.yml` is not proof that CI has executed. This release's Mac binaries were produced by cross-compilation, not by running that workflow. See macos/README.md for a native build.
+The original cross-build was superseded by the successful native CI Mac artifact listed above. Hosted build verification is not real-device Bluetooth or GUI testing. See macos/README.md for a native build.

@@ -2,7 +2,7 @@
 
 Native Objective-C/AppKit port using Apple's IOBluetooth Classic RFCOMM APIs. It uses the same service UUID, bounded length-prefixed framing and version-3 control/clipboard messages as the Windows app. The universal app contains Apple silicon and Intel binaries, targeting macOS 13+.
 
-**Build success does not establish that Bluetooth service advertising, pairing/encryption, TCC permissions or input injection work on real Macs. Neither Mac–Windows nor Mac–Mac has been hardware-tested here.** The downloadable preview was cross-compiled on Linux with Zig 0.13 and macOS SDK headers/framework stubs. Native macOS build instructions and CI are included; that CI has not been run merely by adding its YAML.
+**Build success does not establish that Bluetooth service advertising, pairing/encryption, TCC permissions or input injection work on real Macs. Neither Mac–Windows nor Mac–Mac has been hardware-tested here.** The GitHub Pages download now comes from the successful native macOS CI build, including Apple clang universal compilation and Apple ad-hoc codesign verification. See [CI run](https://github.com/YoungwooShin/mousebridge/actions/runs/43866604334). Earlier Linux cross-build evidence is retained as historical information. Native CI did not launch the GUI or exercise Bluetooth/input permissions.
 
 ## Run
 

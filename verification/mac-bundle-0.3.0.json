@@ -1,22 +1,15 @@
 {
-  "build": "Linux cross-compile Zig0.13/macOS13.3 SDK, rcodesign0.29 ad-hoc bundle signature; no Mac execution",
+  "build": "Native macOS GitHub Actions",
+  "run": "https://github.com/YoungwooShin/mousebridge/actions/runs/43866604334",
+  "source_commit": "1f73ff9a28fe4191e50f1abf555be37672bd0c8f",
   "architectures": [
-    {
-      "cpu": "0x100000c",
-      "adHoc": true,
-      "codePagesVerified": 56,
-      "infoAndResourcesVerified": true
-    },
-    {
-      "cpu": "0x1000007",
-      "adHoc": true,
-      "codePagesVerified": 50,
-      "infoAndResourcesVerified": true
-    }
+    "arm64",
+    "x86_64"
   ],
-  "zipBytes": 122884,
+  "adHocSigned": true,
+  "nativeCodesignVerify": true,
   "notarized": false,
   "developerIdSigned": false,
-  "bundleResourceSeal": true,
-  "nativeCodesignVerification": "NOT RUN"
+  "guiOrBluetoothTested": false,
+  "sha256": "74b270e5f60b8509bcccff66a2f28cab6b73dd1d0aa8816d26dd1af44c55a998"
 }
