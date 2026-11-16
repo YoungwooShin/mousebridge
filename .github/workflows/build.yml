@@ -23,7 +23,7 @@ jobs:
           name: MouseBridge-Windows-x64
           path: artifacts/MouseBridge-Portable-win-x64.zip
   macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - run: ./macos/build.sh
