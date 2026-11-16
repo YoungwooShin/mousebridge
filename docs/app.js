@@ -1,0 +1,3 @@
+const desk=document.querySelector('.desk');
+document.querySelector('#demo-cross').addEventListener('click',()=>{desk.classList.toggle('moved');document.querySelector('#demo-cross').setAttribute('aria-pressed',String(desk.classList.contains('moved')));});
+for(const [name,property,convert] of [['opacity','--alpha',x=>x/100],['width','--width',x=>x+'px'],['color','--glow',x=>x]]){const input=document.querySelector('#demo-'+name);input.addEventListener('input',()=>{desk.style.setProperty(property,convert(input.value));const out=document.querySelector('#'+name+'-value');if(out)out.textContent=input.value;});}

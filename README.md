@@ -2,11 +2,11 @@
 
 **One keyboard and mouse for two computers, directly over Bluetooth.** No shared Wi-Fi, internet connection, VPN or relay server is needed for device-to-device communication.
 
-[한국어 안내](README.ko.md) · [Website / Downloads](https://mousebridge.captivatingweaver4.chatgpt.site) · [MIT license](LICENSE) · [Test results](TEST-RESULTS.md)
+[한국어 안내](README.ko.md) · [Website / Downloads](https://youngwooshin.github.io/mousebridge) · [MIT license](LICENSE) · [Test results](TEST-RESULTS.md)
 
 ## Platforms and downloads
 
-Get the current **v0.3.0** downloads on the [website](https://mousebridge.captivatingweaver4.chatgpt.site/#downloads). Windows ZIP contains only `MouseBridge.exe`; Mac ZIP contains `MouseBridge.app` (Apple silicon + Intel). Source and SHA-256 checksums are provided alongside them.
+Get the current **v0.3.0** downloads on the [website](https://youngwooshin.github.io/mousebridge/#downloads). Windows ZIP contains only `MouseBridge.exe`; Mac ZIP contains `MouseBridge.app` (Apple silicon + Intel). Source and SHA-256 checksums are provided alongside them.
 
 | Pairing | Implementation | Verification |
 | --- | --- | --- |

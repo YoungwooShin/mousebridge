@@ -2,11 +2,11 @@
 
 **블루투스로 두 컴퓨터의 키보드·마우스와 텍스트 클립보드를 공유합니다.** 통신에 같은 와이파이, 인터넷, VPN, 중계 서버가 필요하지 않습니다.
 
-[English](README.md) · [한글 사이트 / 다운로드](https://mousebridge.captivatingweaver4.chatgpt.site/ko/) · [MIT 라이선스](LICENSE) · [테스트 결과](TEST-RESULTS.md)
+[English](README.md) · [한글 사이트 / 다운로드](https://youngwooshin.github.io/mousebridge/ko/) · [MIT 라이선스](LICENSE) · [테스트 결과](TEST-RESULTS.md)
 
 ## 다운로드와 지원 범위
 
-[배포 사이트](https://mousebridge.captivatingweaver4.chatgpt.site/ko/#downloads)에서 v0.3.0을 받습니다.
+[배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 v0.3.0을 받습니다.
 
 - **Windows ↔ Windows:** 기존 시제품. 무설치 ZIP에 `MouseBridge.exe` 하나만 있습니다. 새 경계 표시 UI는 실제 Windows 확인이 필요합니다.
 - **Mac ↔ Windows, Mac ↔ Mac:** 양쪽 역할을 구현한 실험적 Mac 포트입니다. Apple silicon·Intel 통합 앱을 크로스 빌드했으나, 실제 Mac 실행·블루투스·입력 동작은 아직 검증하지 못했습니다.

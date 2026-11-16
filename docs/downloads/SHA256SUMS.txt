@@ -1,0 +1,3 @@
+430a33418a48324f838dff6849e10342fbd98666f8978533a30446e979e7b350  MouseBridge-Portable-win-x64-v0.3.0.zip
+514af286f9b6fd8a7b2cbf6691e489d0bae6158c04bc3e6f8893982f01488187  MouseBridge-macOS-universal-v0.3.0.zip
+53dd2b3522aeb8d89786da4deea09582eeceece6840f3322908b17128318077f  MouseBridge-source-v0.3.0.zip
