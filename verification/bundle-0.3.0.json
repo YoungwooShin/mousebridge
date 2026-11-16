@@ -1,0 +1,1398 @@
+{
+  "selfContainedFrameworks": [
+    {
+      "name": "Microsoft.NETCore.App",
+      "version": "8.0.34"
+    },
+    {
+      "name": "Microsoft.WindowsDesktop.App",
+      "version": "8.0.34"
+    }
+  ],
+  "bundleVersion": "6.0",
+  "fileCount": 230,
+  "extractAll": true,
+  "exeBytes": 72275734,
+  "entries": [
+    {
+      "name": "MouseBridge.dll",
+      "bytes": 235520,
+      "compressed": 71899,
+      "type": 1
+    },
+    {
+      "name": "MouseBridge.runtimeconfig.json",
+      "bytes": 450,
+      "compressed": 0,
+      "type": 4
+    },
+    {
+      "name": "Microsoft.CSharp.dll",
+      "bytes": 1005392,
+      "compressed": 487408,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.VisualBasic.Core.dll",
+      "bytes": 1247016,
+      "compressed": 591952,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.Win32.Primitives.dll",
+      "bytes": 15184,
+      "compressed": 9264,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.Win32.Registry.dll",
+      "bytes": 120656,
+      "compressed": 53465,
+      "type": 1
+    },
+    {
+      "name": "System.AppContext.dll",
+      "bytes": 15184,
+      "compressed": 9157,
+      "type": 1
+    },
+    {
+      "name": "System.Buffers.dll",
+      "bytes": 15144,
+      "compressed": 9136,
+      "type": 1
+    },
+    {
+      "name": "System.Collections.Concurrent.dll",
+      "bytes": 276264,
+      "compressed": 134821,
+      "type": 1
+    },
+    {
+      "name": "System.Collections.Immutable.dll",
+      "bytes": 837416,
+      "compressed": 360150,
+      "type": 1
+    },
+    {
+      "name": "System.Collections.NonGeneric.dll",
+      "bytes": 104232,
+      "compressed": 43866,
+      "type": 1
+    },
+    {
+      "name": "System.Collections.Specialized.dll",
+      "bytes": 104232,
+      "compressed": 47173,
+      "type": 1
+    },
+    {
+      "name": "System.Collections.dll",
+      "bytes": 259880,
+      "compressed": 123262,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.Annotations.dll",
+      "bytes": 198440,
+      "compressed": 87241,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.DataAnnotations.dll",
+      "bytes": 16720,
+      "compressed": 9662,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.EventBasedAsync.dll",
+      "bytes": 46888,
+      "compressed": 19317,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.Primitives.dll",
+      "bytes": 79656,
+      "compressed": 34846,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.TypeConverter.dll",
+      "bytes": 747344,
+      "compressed": 338842,
+      "type": 1
+    },
+    {
+      "name": "System.ComponentModel.dll",
+      "bytes": 30544,
+      "compressed": 10191,
+      "type": 1
+    },
+    {
+      "name": "System.Configuration.dll",
+      "bytes": 19280,
+      "compressed": 10228,
+      "type": 1
+    },
+    {
+      "name": "System.Console.dll",
+      "bytes": 173864,
+      "compressed": 76915,
+      "type": 1
+    },
+    {
+      "name": "System.Core.dll",
+      "bytes": 23376,
+      "compressed": 11729,
+      "type": 1
+    },
+    {
+      "name": "System.Data.Common.dll",
+      "bytes": 2860840,
+      "compressed": 1309601,
+      "type": 1
+    },
+    {
+      "name": "System.Data.DataSetExtensions.dll",
+      "bytes": 15656,
+      "compressed": 9126,
+      "type": 1
+    },
+    {
+      "name": "System.Data.dll",
+      "bytes": 24872,
+      "compressed": 12201,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.Contracts.dll",
+      "bytes": 16208,
+      "compressed": 9458,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.Debug.dll",
+      "bytes": 15656,
+      "compressed": 9317,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.DiagnosticSource.dll",
+      "bytes": 415528,
+      "compressed": 193186,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.FileVersionInfo.dll",
+      "bytes": 46928,
+      "compressed": 18452,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.Process.dll",
+      "bytes": 337704,
+      "compressed": 155559,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.StackTrace.dll",
+      "bytes": 46888,
+      "compressed": 19902,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.TextWriterTraceListener.dll",
+      "bytes": 67408,
+      "compressed": 31422,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.Tools.dll",
+      "bytes": 15144,
+      "compressed": 9218,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.TraceSource.dll",
+      "bytes": 145192,
+      "compressed": 63913,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.Tracing.dll",
+      "bytes": 16208,
+      "compressed": 9570,
+      "type": 1
+    },
+    {
+      "name": "System.Drawing.Primitives.dll",
+      "bytes": 132904,
+      "compressed": 57378,
+      "type": 1
+    },
+    {
+      "name": "System.Dynamic.Runtime.dll",
+      "bytes": 16168,
+      "compressed": 9486,
+      "type": 1
+    },
+    {
+      "name": "System.Formats.Asn1.dll",
+      "bytes": 243536,
+      "compressed": 117069,
+      "type": 1
+    },
+    {
+      "name": "System.Formats.Tar.dll",
+      "bytes": 292648,
+      "compressed": 139841,
+      "type": 1
+    },
+    {
+      "name": "System.Globalization.Calendars.dll",
+      "bytes": 15696,
+      "compressed": 9354,
+      "type": 1
+    },
+    {
+      "name": "System.Globalization.Extensions.dll",
+      "bytes": 15144,
+      "compressed": 9217,
+      "type": 1
+    },
+    {
+      "name": "System.Globalization.dll",
+      "bytes": 15656,
+      "compressed": 9305,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Compression.Brotli.dll",
+      "bytes": 83752,
+      "compressed": 37499,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Compression.FileSystem.dll",
+      "bytes": 15144,
+      "compressed": 9026,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Compression.ZipFile.dll",
+      "bytes": 55120,
+      "compressed": 25444,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Compression.dll",
+      "bytes": 264016,
+      "compressed": 128462,
+      "type": 1
+    },
+    {
+      "name": "System.IO.FileSystem.AccessControl.dll",
+      "bytes": 104232,
+      "compressed": 46990,
+      "type": 1
+    },
+    {
+      "name": "System.IO.FileSystem.DriveInfo.dll",
+      "bytes": 55080,
+      "compressed": 22614,
+      "type": 1
+    },
+    {
+      "name": "System.IO.FileSystem.Primitives.dll",
+      "bytes": 15184,
+      "compressed": 9243,
+      "type": 1
+    },
+    {
+      "name": "System.IO.FileSystem.Watcher.dll",
+      "bytes": 87888,
+      "compressed": 40718,
+      "type": 1
+    },
+    {
+      "name": "System.IO.FileSystem.dll",
+      "bytes": 15656,
+      "compressed": 9342,
+      "type": 1
+    },
+    {
+      "name": "System.IO.IsolatedStorage.dll",
+      "bytes": 91984,
+      "compressed": 40030,
+      "type": 1
+    },
+    {
+      "name": "System.IO.MemoryMappedFiles.dll",
+      "bytes": 83752,
+      "compressed": 36641,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Pipes.AccessControl.dll",
+      "bytes": 16168,
+      "compressed": 9605,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Pipes.dll",
+      "bytes": 165672,
+      "compressed": 75528,
+      "type": 1
+    },
+    {
+      "name": "System.IO.UnmanagedMemoryStream.dll",
+      "bytes": 15144,
+      "compressed": 9251,
+      "type": 1
+    },
+    {
+      "name": "System.IO.dll",
+      "bytes": 15656,
+      "compressed": 9301,
+      "type": 1
+    },
+    {
+      "name": "System.Linq.Expressions.dll",
+      "bytes": 3675944,
+      "compressed": 1225134,
+      "type": 1
+    },
+    {
+      "name": "System.Linq.Parallel.dll",
+      "bytes": 804648,
+      "compressed": 330056,
+      "type": 1
+    },
+    {
+      "name": "System.Linq.Queryable.dll",
+      "bytes": 173864,
+      "compressed": 60652,
+      "type": 1
+    },
+    {
+      "name": "System.Linq.dll",
+      "bytes": 542504,
+      "compressed": 238214,
+      "type": 1
+    },
+    {
+      "name": "System.Memory.dll",
+      "bytes": 157520,
+      "compressed": 73710,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Http.Json.dll",
+      "bytes": 128808,
+      "compressed": 56310,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Http.dll",
+      "bytes": 1734440,
+      "compressed": 799542,
+      "type": 1
+    },
+    {
+      "name": "System.Net.HttpListener.dll",
+      "bytes": 550696,
+      "compressed": 260291,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Mail.dll",
+      "bytes": 431952,
+      "compressed": 206414,
+      "type": 1
+    },
+    {
+      "name": "System.Net.NameResolution.dll",
+      "bytes": 112464,
+      "compressed": 53678,
+      "type": 1
+    },
+    {
+      "name": "System.Net.NetworkInformation.dll",
+      "bytes": 157480,
+      "compressed": 72078,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Ping.dll",
+      "bytes": 96040,
+      "compressed": 45197,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Primitives.dll",
+      "bytes": 231208,
+      "compressed": 114842,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Quic.dll",
+      "bytes": 288592,
+      "compressed": 134480,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Requests.dll",
+      "bytes": 345896,
+      "compressed": 166680,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Security.dll",
+      "bytes": 669520,
+      "compressed": 302063,
+      "type": 1
+    },
+    {
+      "name": "System.Net.ServicePoint.dll",
+      "bytes": 46888,
+      "compressed": 19438,
+      "type": 1
+    },
+    {
+      "name": "System.Net.Sockets.dll",
+      "bytes": 546640,
+      "compressed": 252179,
+      "type": 1
+    },
+    {
+      "name": "System.Net.WebClient.dll",
+      "bytes": 169768,
+      "compressed": 77446,
+      "type": 1
+    },
+    {
+      "name": "System.Net.WebHeaderCollection.dll",
+      "bytes": 67368,
+      "compressed": 29253,
+      "type": 1
+    },
+    {
+      "name": "System.Net.WebProxy.dll",
+      "bytes": 42792,
+      "compressed": 18831,
+      "type": 1
+    },
+    {
+      "name": "System.Net.WebSockets.Client.dll",
+      "bytes": 100136,
+      "compressed": 46641,
+      "type": 1
+    },
+    {
+      "name": "System.Net.WebSockets.dll",
+      "bytes": 190248,
+      "compressed": 91835,
+      "type": 1
+    },
+    {
+      "name": "System.Net.dll",
+      "bytes": 17192,
+      "compressed": 9816,
+      "type": 1
+    },
+    {
+      "name": "System.Numerics.Vectors.dll",
+      "bytes": 15656,
+      "compressed": 9296,
+      "type": 1
+    },
+    {
+      "name": "System.Numerics.dll",
+      "bytes": 15184,
+      "compressed": 9097,
+      "type": 1
+    },
+    {
+      "name": "System.ObjectModel.dll",
+      "bytes": 79656,
+      "compressed": 34639,
+      "type": 1
+    },
+    {
+      "name": "System.Private.CoreLib.dll",
+      "bytes": 13174568,
+      "compressed": 5600098,
+      "type": 1
+    },
+    {
+      "name": "System.Private.DataContractSerialization.dll",
+      "bytes": 2082640,
+      "compressed": 900281,
+      "type": 1
+    },
+    {
+      "name": "System.Private.Uri.dll",
+      "bytes": 259880,
+      "compressed": 138108,
+      "type": 1
+    },
+    {
+      "name": "System.Private.Xml.Linq.dll",
+      "bytes": 403280,
+      "compressed": 187339,
+      "type": 1
+    },
+    {
+      "name": "System.Private.Xml.dll",
+      "bytes": 7997264,
+      "compressed": 3517011,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.DispatchProxy.dll",
+      "bytes": 75560,
+      "compressed": 34211,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Emit.ILGeneration.dll",
+      "bytes": 15696,
+      "compressed": 9333,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Emit.Lightweight.dll",
+      "bytes": 15696,
+      "compressed": 9283,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Emit.dll",
+      "bytes": 128848,
+      "compressed": 59841,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Extensions.dll",
+      "bytes": 15184,
+      "compressed": 9206,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Metadata.dll",
+      "bytes": 1115944,
+      "compressed": 481809,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.Primitives.dll",
+      "bytes": 15696,
+      "compressed": 9421,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.TypeExtensions.dll",
+      "bytes": 42792,
+      "compressed": 16246,
+      "type": 1
+    },
+    {
+      "name": "System.Reflection.dll",
+      "bytes": 16208,
+      "compressed": 9533,
+      "type": 1
+    },
+    {
+      "name": "System.Resources.Reader.dll",
+      "bytes": 15184,
+      "compressed": 9168,
+      "type": 1
+    },
+    {
+      "name": "System.Resources.ResourceManager.dll",
+      "bytes": 15656,
+      "compressed": 9277,
+      "type": 1
+    },
+    {
+      "name": "System.Resources.Writer.dll",
+      "bytes": 50984,
+      "compressed": 23764,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.CompilerServices.Unsafe.dll",
+      "bytes": 15144,
+      "compressed": 9148,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.CompilerServices.VisualC.dll",
+      "bytes": 30504,
+      "compressed": 10850,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Extensions.dll",
+      "bytes": 17704,
+      "compressed": 10054,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Handles.dll",
+      "bytes": 15144,
+      "compressed": 9244,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.InteropServices.JavaScript.dll",
+      "bytes": 50984,
+      "compressed": 17594,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.InteropServices.RuntimeInformation.dll",
+      "bytes": 15144,
+      "compressed": 9183,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.InteropServices.dll",
+      "bytes": 96040,
+      "compressed": 43617,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Intrinsics.dll",
+      "bytes": 16680,
+      "compressed": 9686,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Loader.dll",
+      "bytes": 15656,
+      "compressed": 9352,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Numerics.dll",
+      "bytes": 329552,
+      "compressed": 159771,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Serialization.Formatters.dll",
+      "bytes": 309032,
+      "compressed": 152161,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Serialization.Json.dll",
+      "bytes": 15656,
+      "compressed": 9293,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Serialization.Primitives.dll",
+      "bytes": 38736,
+      "compressed": 15224,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Serialization.Xml.dll",
+      "bytes": 16680,
+      "compressed": 9621,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.Serialization.dll",
+      "bytes": 16680,
+      "compressed": 9575,
+      "type": 1
+    },
+    {
+      "name": "System.Runtime.dll",
+      "bytes": 43304,
+      "compressed": 17784,
+      "type": 1
+    },
+    {
+      "name": "System.Security.AccessControl.dll",
+      "bytes": 231248,
+      "compressed": 108485,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Claims.dll",
+      "bytes": 100136,
+      "compressed": 43278,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Algorithms.dll",
+      "bytes": 17192,
+      "compressed": 9774,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Cng.dll",
+      "bytes": 16208,
+      "compressed": 9534,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Csp.dll",
+      "bytes": 15656,
+      "compressed": 9363,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Encoding.dll",
+      "bytes": 15656,
+      "compressed": 9306,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.OpenSsl.dll",
+      "bytes": 15144,
+      "compressed": 9240,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Primitives.dll",
+      "bytes": 15696,
+      "compressed": 9385,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.X509Certificates.dll",
+      "bytes": 16680,
+      "compressed": 9731,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.dll",
+      "bytes": 2049832,
+      "compressed": 871896,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Principal.Windows.dll",
+      "bytes": 186152,
+      "compressed": 89262,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Principal.dll",
+      "bytes": 15144,
+      "compressed": 9187,
+      "type": 1
+    },
+    {
+      "name": "System.Security.SecureString.dll",
+      "bytes": 15144,
+      "compressed": 9223,
+      "type": 1
+    },
+    {
+      "name": "System.Security.dll",
+      "bytes": 18216,
+      "compressed": 10037,
+      "type": 1
+    },
+    {
+      "name": "System.ServiceModel.Web.dll",
+      "bytes": 16680,
+      "compressed": 9584,
+      "type": 1
+    },
+    {
+      "name": "System.ServiceProcess.dll",
+      "bytes": 15656,
+      "compressed": 9338,
+      "type": 1
+    },
+    {
+      "name": "System.Text.Encoding.CodePages.dll",
+      "bytes": 861992,
+      "compressed": 585055,
+      "type": 1
+    },
+    {
+      "name": "System.Text.Encoding.Extensions.dll",
+      "bytes": 15696,
+      "compressed": 9316,
+      "type": 1
+    },
+    {
+      "name": "System.Text.Encoding.dll",
+      "bytes": 15656,
+      "compressed": 9268,
+      "type": 1
+    },
+    {
+      "name": "System.Text.Encodings.Web.dll",
+      "bytes": 132904,
+      "compressed": 56890,
+      "type": 1
+    },
+    {
+      "name": "System.Text.Json.dll",
+      "bytes": 1500968,
+      "compressed": 640267,
+      "type": 1
+    },
+    {
+      "name": "System.Text.RegularExpressions.dll",
+      "bytes": 1021736,
+      "compressed": 483008,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Channels.dll",
+      "bytes": 132904,
+      "compressed": 61556,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Overlapped.dll",
+      "bytes": 15656,
+      "compressed": 9345,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Tasks.Dataflow.dll",
+      "bytes": 489296,
+      "compressed": 222507,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Tasks.Extensions.dll",
+      "bytes": 15656,
+      "compressed": 9330,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Tasks.Parallel.dll",
+      "bytes": 132944,
+      "compressed": 60430,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Tasks.dll",
+      "bytes": 16680,
+      "compressed": 9623,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Thread.dll",
+      "bytes": 15696,
+      "compressed": 9387,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.ThreadPool.dll",
+      "bytes": 15696,
+      "compressed": 9309,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.Timer.dll",
+      "bytes": 15144,
+      "compressed": 9153,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.dll",
+      "bytes": 83752,
+      "compressed": 39684,
+      "type": 1
+    },
+    {
+      "name": "System.Transactions.Local.dll",
+      "bytes": 661288,
+      "compressed": 264653,
+      "type": 1
+    },
+    {
+      "name": "System.Transactions.dll",
+      "bytes": 16168,
+      "compressed": 9440,
+      "type": 1
+    },
+    {
+      "name": "System.ValueTuple.dll",
+      "bytes": 15144,
+      "compressed": 9206,
+      "type": 1
+    },
+    {
+      "name": "System.Web.HttpUtility.dll",
+      "bytes": 59216,
+      "compressed": 28240,
+      "type": 1
+    },
+    {
+      "name": "System.Web.dll",
+      "bytes": 15144,
+      "compressed": 9143,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.dll",
+      "bytes": 15656,
+      "compressed": 9303,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.Linq.dll",
+      "bytes": 15656,
+      "compressed": 9264,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.ReaderWriter.dll",
+      "bytes": 21800,
+      "compressed": 11137,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.Serialization.dll",
+      "bytes": 16208,
+      "compressed": 9320,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.XDocument.dll",
+      "bytes": 15656,
+      "compressed": 9438,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.XPath.XDocument.dll",
+      "bytes": 30504,
+      "compressed": 10015,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.XPath.dll",
+      "bytes": 15656,
+      "compressed": 9358,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.XmlDocument.dll",
+      "bytes": 15656,
+      "compressed": 9401,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.XmlSerializer.dll",
+      "bytes": 17704,
+      "compressed": 9923,
+      "type": 1
+    },
+    {
+      "name": "System.Xml.dll",
+      "bytes": 23336,
+      "compressed": 11393,
+      "type": 1
+    },
+    {
+      "name": "System.dll",
+      "bytes": 49960,
+      "compressed": 19224,
+      "type": 1
+    },
+    {
+      "name": "mscorlib.dll",
+      "bytes": 59216,
+      "compressed": 22198,
+      "type": 1
+    },
+    {
+      "name": "netstandard.dll",
+      "bytes": 100648,
+      "compressed": 32943,
+      "type": 1
+    },
+    {
+      "name": "Accessibility.dll",
+      "bytes": 20776,
+      "compressed": 11553,
+      "type": 1
+    },
+    {
+      "name": "DirectWriteForwarder.dll",
+      "bytes": 526120,
+      "compressed": 244485,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.VisualBasic.Forms.dll",
+      "bytes": 247592,
+      "compressed": 111183,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.VisualBasic.dll",
+      "bytes": 18728,
+      "compressed": 10518,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.Win32.Registry.AccessControl.dll",
+      "bytes": 34600,
+      "compressed": 12241,
+      "type": 1
+    },
+    {
+      "name": "Microsoft.Win32.SystemEvents.dll",
+      "bytes": 96080,
+      "compressed": 45139,
+      "type": 1
+    },
+    {
+      "name": "PresentationCore.dll",
+      "bytes": 8562472,
+      "compressed": 3611585,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework-SystemCore.dll",
+      "bytes": 38696,
+      "compressed": 15914,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework-SystemData.dll",
+      "bytes": 34640,
+      "compressed": 13910,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework-SystemDrawing.dll",
+      "bytes": 34600,
+      "compressed": 13223,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework-SystemXml.dll",
+      "bytes": 34600,
+      "compressed": 14073,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework-SystemXmlLinq.dll",
+      "bytes": 30504,
+      "compressed": 11013,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.Aero.dll",
+      "bytes": 444240,
+      "compressed": 148535,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.Aero2.dll",
+      "bytes": 448296,
+      "compressed": 150696,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.AeroLite.dll",
+      "bytes": 239440,
+      "compressed": 76870,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.Classic.dll",
+      "bytes": 272208,
+      "compressed": 92003,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.Luna.dll",
+      "bytes": 669480,
+      "compressed": 191094,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.Royale.dll",
+      "bytes": 333608,
+      "compressed": 109951,
+      "type": 1
+    },
+    {
+      "name": "PresentationFramework.dll",
+      "bytes": 16135976,
+      "compressed": 7083778,
+      "type": 1
+    },
+    {
+      "name": "PresentationUI.dll",
+      "bytes": 1287976,
+      "compressed": 533297,
+      "type": 1
+    },
+    {
+      "name": "ReachFramework.dll",
+      "bytes": 1607504,
+      "compressed": 707207,
+      "type": 1
+    },
+    {
+      "name": "System.CodeDom.dll",
+      "bytes": 489296,
+      "compressed": 208312,
+      "type": 1
+    },
+    {
+      "name": "System.Configuration.ConfigurationManager.dll",
+      "bytes": 1075024,
+      "compressed": 489525,
+      "type": 1
+    },
+    {
+      "name": "System.Design.dll",
+      "bytes": 21800,
+      "compressed": 11310,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.EventLog.Messages.dll",
+      "bytes": 800592,
+      "compressed": 11096,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.EventLog.dll",
+      "bytes": 386856,
+      "compressed": 172820,
+      "type": 1
+    },
+    {
+      "name": "System.Diagnostics.PerformanceCounter.dll",
+      "bytes": 288552,
+      "compressed": 136931,
+      "type": 1
+    },
+    {
+      "name": "System.DirectoryServices.dll",
+      "bytes": 1046312,
+      "compressed": 467234,
+      "type": 1
+    },
+    {
+      "name": "System.Drawing.Common.dll",
+      "bytes": 1529640,
+      "compressed": 554609,
+      "type": 1
+    },
+    {
+      "name": "System.Drawing.Design.dll",
+      "bytes": 15184,
+      "compressed": 9250,
+      "type": 1
+    },
+    {
+      "name": "System.Drawing.dll",
+      "bytes": 21288,
+      "compressed": 11247,
+      "type": 1
+    },
+    {
+      "name": "System.IO.Packaging.dll",
+      "bytes": 292688,
+      "compressed": 129027,
+      "type": 1
+    },
+    {
+      "name": "System.Printing.dll",
+      "bytes": 980776,
+      "compressed": 408594,
+      "type": 1
+    },
+    {
+      "name": "System.Resources.Extensions.dll",
+      "bytes": 137000,
+      "compressed": 62245,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Pkcs.dll",
+      "bytes": 767824,
+      "compressed": 339584,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.ProtectedData.dll",
+      "bytes": 55120,
+      "compressed": 23816,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Cryptography.Xml.dll",
+      "bytes": 489256,
+      "compressed": 217388,
+      "type": 1
+    },
+    {
+      "name": "System.Security.Permissions.dll",
+      "bytes": 186192,
+      "compressed": 72580,
+      "type": 1
+    },
+    {
+      "name": "System.Threading.AccessControl.dll",
+      "bytes": 83752,
+      "compressed": 34799,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Controls.Ribbon.dll",
+      "bytes": 1451816,
+      "compressed": 529739,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Extensions.dll",
+      "bytes": 116520,
+      "compressed": 52029,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Forms.Design.Editors.dll",
+      "bytes": 16168,
+      "compressed": 9493,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Forms.Design.dll",
+      "bytes": 5564240,
+      "compressed": 1679948,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Forms.Primitives.dll",
+      "bytes": 3012392,
+      "compressed": 969336,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Forms.dll",
+      "bytes": 13563728,
+      "compressed": 4766101,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Input.Manipulations.dll",
+      "bytes": 137000,
+      "compressed": 62748,
+      "type": 1
+    },
+    {
+      "name": "System.Windows.Presentation.dll",
+      "bytes": 30504,
+      "compressed": 11258,
+      "type": 1
+    },
+    {
+      "name": "System.Xaml.dll",
+      "bytes": 1427280,
+      "compressed": 632215,
+      "type": 1
+    },
+    {
+      "name": "UIAutomationClient.dll",
+      "bytes": 415568,
+      "compressed": 186263,
+      "type": 1
+    },
+    {
+      "name": "UIAutomationClientSideProviders.dll",
+      "bytes": 870224,
+      "compressed": 399672,
+      "type": 1
+    },
+    {
+      "name": "UIAutomationProvider.dll",
+      "bytes": 59216,
+      "compressed": 21431,
+      "type": 1
+    },
+    {
+      "name": "UIAutomationTypes.dll",
+      "bytes": 313128,
+      "compressed": 121025,
+      "type": 1
+    },
+    {
+      "name": "WindowsBase.dll",
+      "bytes": 2254632,
+      "compressed": 964154,
+      "type": 1
+    },
+    {
+      "name": "WindowsFormsIntegration.dll",
+      "bytes": 210728,
+      "compressed": 93187,
+      "type": 1
+    },
+    {
+      "name": "D3DCompiler_47_cor3.dll",
+      "bytes": 4741488,
+      "compressed": 2150013,
+      "type": 2
+    },
+    {
+      "name": "PenImc_cor3.dll",
+      "bytes": 158032,
+      "compressed": 73852,
+      "type": 2
+    },
+    {
+      "name": "PresentationNative_cor3.dll",
+      "bytes": 1234728,
+      "compressed": 581944,
+      "type": 2
+    },
+    {
+      "name": "vcruntime140_cor3.dll",
+      "bytes": 124544,
+      "compressed": 60515,
+      "type": 2
+    },
+    {
+      "name": "wpfgfx_cor3.dll",
+      "bytes": 1956136,
+      "compressed": 860686,
+      "type": 2
+    },
+    {
+      "name": "Microsoft.Windows.SDK.NET.dll",
+      "bytes": 24877600,
+      "compressed": 6124620,
+      "type": 1
+    },
+    {
+      "name": "WinRT.Runtime.dll",
+      "bytes": 528944,
+      "compressed": 184386,
+      "type": 1
+    },
+    {
+      "name": "MouseBridge.Core.dll",
+      "bytes": 43008,
+      "compressed": 19185,
+      "type": 1
+    },
+    {
+      "name": "MouseBridge.deps.json",
+      "bytes": 34623,
+      "compressed": 0,
+      "type": 3
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+macos/artifacts/
+.DS_Store
+*.user
+*.suo
+*.log
+.env
+.env.*

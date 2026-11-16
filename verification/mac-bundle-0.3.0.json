@@ -1,0 +1,22 @@
+{
+  "build": "Linux cross-compile Zig0.13/macOS13.3 SDK, rcodesign0.29 ad-hoc bundle signature; no Mac execution",
+  "architectures": [
+    {
+      "cpu": "0x100000c",
+      "adHoc": true,
+      "codePagesVerified": 56,
+      "infoAndResourcesVerified": true
+    },
+    {
+      "cpu": "0x1000007",
+      "adHoc": true,
+      "codePagesVerified": 50,
+      "infoAndResourcesVerified": true
+    }
+  ],
+  "zipBytes": 122884,
+  "notarized": false,
+  "developerIdSigned": false,
+  "bundleResourceSeal": true,
+  "nativeCodesignVerification": "NOT RUN"
+}

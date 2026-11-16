@@ -1,0 +1,302 @@
+<Window x:Class="MouseBridge.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MouseBridge" Width="880" Height="720" MinWidth="660" MinHeight="560"
+        Background="#F5F7FB" Foreground="#182438" FontFamily="Segoe UI" FontSize="14"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <SolidColorBrush x:Key="MutedText" Color="#64748B"/>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#26364D"/>
+            <Setter Property="BorderBrush" Value="#D4DCE8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#657DDD"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#365BCE"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#4263D6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#4263D6"/>
+        </Style>
+        <Style x:Key="TextButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#4263D6"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="BorderBrush" Value="#D4DCE8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="SelectionBrush" Value="#B9C9FA"/>
+        </Style>
+        <Style TargetType="Expander">
+            <Setter Property="Foreground" Value="#42536B"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2E7F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,24" MaxWidth="900">
+            <Grid Margin="0,0,0,22">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Background="#4263D6" Width="42" Height="42" CornerRadius="11" VerticalAlignment="Top">
+                    <TextBlock Text="M" Foreground="White" FontSize="23" FontWeight="SemiBold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,8,0">
+                    <TextBlock Text="MouseBridge" FontSize="25" FontWeight="SemiBold"/>
+                    <TextBlock Text="One keyboard and mouse, shared over Bluetooth." Foreground="{StaticResource MutedText}"
+                               FontSize="13" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Grid.Column="2" Background="#E9EDF6" CornerRadius="6" Padding="9,4" VerticalAlignment="Top" Margin="0,4,0,0">
+                    <TextBlock Text="v0.3.0" Foreground="#66758D" FontSize="11" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Choose this PC's role" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="Choose Main on the PC with your keyboard, and Secondary on the other PC."
+                               Foreground="{StaticResource MutedText}" Margin="0,5,0,16" TextWrapping="Wrap"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Button x:Name="MainRoleButton" Style="{StaticResource PrimaryButton}" Click="Main_Click"
+                                Padding="18" HorizontalContentAlignment="Left" ToolTip="Use this PC's keyboard and mouse to control your secondary PC.">
+                            <StackPanel>
+                                <TextBlock Text="Main PC" FontSize="20" FontWeight="SemiBold"/>
+                                <TextBlock Text="Send keyboard and mouse input" FontSize="12" Opacity="0.86" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SecondaryRoleButton" Grid.Column="2" Click="Sub_Click" Padding="18"
+                                HorizontalContentAlignment="Left" Background="#F8FAFE" ToolTip="Receive input from your main PC.">
+                            <StackPanel>
+                                <TextBlock Text="Secondary PC" FontSize="20" FontWeight="SemiBold"/>
+                                <TextBlock Text="Receive input from your main PC" Opacity="0.86"
+                                           FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock x:Name="Mode" Text="Ready to connect" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="Status" Text="Choose a role to get started." Foreground="{StaticResource MutedText}"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Stop" Click="Stop_Click" MinWidth="72" VerticalAlignment="Top"
+                                ToolTip="Stop sharing and automatic connection attempts."/>
+                    </Grid>
+                    <Border Background="#EFF3FF" CornerRadius="8" Padding="12,10" Margin="0,16,0,0">
+                        <TextBlock x:Name="InputStatus" Text="Your switch shortcut and clipboard sharing are applied automatically."
+                                   Foreground="#3655AF" TextWrapping="Wrap" FontSize="13"/>
+                    </Border>
+                    <StackPanel x:Name="DevicePanel" Visibility="Collapsed" Margin="0,14,0,0">
+                        <TextBlock Text="More than one secondary PC is available." Foreground="{StaticResource MutedText}" Margin="0,0,0,8"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <ComboBox x:Name="Devices" DisplayMemberPath="Name"/>
+                            <Button Grid.Column="2" Content="Connect" Click="ChooseSub_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Switch shortcut" FontSize="17" FontWeight="SemiBold"/>
+                        <Border Grid.Column="1" BorderBrush="#D8E0EF" BorderThickness="1" CornerRadius="5" Padding="9,3">
+                            <TextBlock x:Name="ShortcutSummary" Text="F8" Foreground="#4263D6" FontWeight="SemiBold" FontSize="12"/>
+                        </Border>
+                    </Grid>
+                    <TextBlock Text="Press once to control your secondary PC. Press again to return."
+                               Foreground="{StaticResource MutedText}" Margin="0,5,0,14" TextWrapping="Wrap"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <WrapPanel VerticalAlignment="Center">
+                            <CheckBox x:Name="ShortcutCtrl" Content="Ctrl"/>
+                            <CheckBox x:Name="ShortcutAlt" Content="Alt"/>
+                            <CheckBox x:Name="ShortcutShift" Content="Shift"/>
+                            <ComboBox x:Name="ShortcutKey" Width="100" SelectedIndex="7" Margin="0,0,12,0"
+                                      AutomationProperties.Name="Switch shortcut key">
+                                <ComboBoxItem Content="F1"/><ComboBoxItem Content="F2"/><ComboBoxItem Content="F3"/>
+                                <ComboBoxItem Content="F4"/><ComboBoxItem Content="F5"/><ComboBoxItem Content="F6"/>
+                                <ComboBoxItem Content="F7"/><ComboBoxItem Content="F8"/><ComboBoxItem Content="F9"/>
+                                <ComboBoxItem Content="F10"/><ComboBoxItem Content="F11"/><ComboBoxItem Content="F12"/>
+                            </ComboBox>
+                        </WrapPanel>
+                        <Button Grid.Column="1" Content="Save shortcut" Click="ShortcutSave_Click" VerticalAlignment="Top"/>
+                    </Grid>
+                    <TextBlock x:Name="ShortcutFeedback" Text="Default: F8. Saved on this PC."
+                               Foreground="{StaticResource MutedText}" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Screen arrangement" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="On Main: drag either screen to swap left and right. Only the middle 80% of an outer screen edge switches control."
+                               TextWrapping="Wrap" Foreground="{StaticResource MutedText}" Margin="0,5,0,12"/>
+                    <Grid x:Name="ScreenLayout" Height="100" AllowDrop="True" Drop="ScreenLayout_Drop" DragOver="ScreenLayout_DragOver">
+                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <Border x:Name="LayoutMain" Background="#E8EEFF" BorderBrush="#4263D6" BorderThickness="2" CornerRadius="8" Padding="16" Cursor="SizeWE" MouseLeftButtonDown="Screen_MouseDown" MouseMove="Screen_MouseMove" Tag="Main">
+                            <TextBlock Text="Main PC" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border x:Name="LayoutSecondary" Background="#EEF2F7" BorderBrush="#A4B0C4" BorderThickness="2" CornerRadius="8" Padding="16" Cursor="SizeWE" MouseLeftButtonDown="Screen_MouseDown" MouseMove="Screen_MouseMove" Tag="Secondary">
+                            <TextBlock Text="Secondary PC" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    <WrapPanel Margin="0,12,0,8">
+                        <CheckBox x:Name="EdgeEnabled" Content="Switch at screen edge"/>
+                        <CheckBox x:Name="EdgeVisible" Content="Show edge indicator" Click="EdgeVisibility_Click"/>
+                    </WrapPanel>
+                    <Border Background="#F7F9FD" CornerRadius="10" Padding="16" Margin="0,4,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Edge appearance" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="A soft glow marks the screen you have left. It never blocks clicks."
+                                       Foreground="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,14"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="Width" FontSize="12" Foreground="{StaticResource MutedText}"/>
+                                <TextBlock x:Name="EdgeWidthValue" Grid.Column="1" Text="50 px" FontSize="12" FontWeight="SemiBold"/>
+                            </Grid>
+                            <Slider x:Name="EdgeWidth" Minimum="8" Maximum="120" Value="50" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    ValueChanged="EdgeAppearance_Changed" AutomationProperties.Name="Edge indicator width in pixels" Margin="0,7,0,14"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="Opacity" FontSize="12" Foreground="{StaticResource MutedText}"/>
+                                <TextBlock x:Name="EdgeOpacityValue" Grid.Column="1" Text="35%" FontSize="12" FontWeight="SemiBold"/>
+                            </Grid>
+                            <Slider x:Name="EdgeOpacity" Minimum="0" Maximum="100" Value="35" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    ValueChanged="EdgeAppearance_Changed" AutomationProperties.Name="Edge indicator opacity percent" Margin="0,7,0,14"/>
+                            <TextBlock Text="Color" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,0,0,8"/>
+                            <WrapPanel>
+                                <Button Tag="#4263D6" Background="#4263D6" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,8,8" Click="EdgePreset_Click" ToolTip="Indigo" AutomationProperties.Name="Indigo indicator"/>
+                                <Button Tag="#14B8A6" Background="#14B8A6" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,8,8" Click="EdgePreset_Click" ToolTip="Teal" AutomationProperties.Name="Teal indicator"/>
+                                <Button Tag="#38BDF8" Background="#38BDF8" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,8,8" Click="EdgePreset_Click" ToolTip="Sky" AutomationProperties.Name="Sky indicator"/>
+                                <Button Tag="#A78BFA" Background="#A78BFA" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,8,8" Click="EdgePreset_Click" ToolTip="Lavender" AutomationProperties.Name="Lavender indicator"/>
+                                <Button Tag="#F59E0B" Background="#F59E0B" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,8,8" Click="EdgePreset_Click" ToolTip="Amber" AutomationProperties.Name="Amber indicator"/>
+                                <Button Tag="#F472B6" Background="#F472B6" Width="32" Height="32" MinHeight="32" Padding="0" Margin="0,0,12,8" Click="EdgePreset_Click" ToolTip="Rose" AutomationProperties.Name="Rose indicator"/>
+                                <TextBox x:Name="EdgeColor" Width="100" MaxLength="7" TextChanged="EdgeColor_TextChanged" Margin="0,0,8,8" AutomationProperties.Name="Indicator hex color"/>
+                                <Button Content="Choose color…" Click="EdgeColorChoose_Click" Margin="0,0,0,8"/>
+                            </WrapPanel>
+                            <Border Background="#E9EEF8" CornerRadius="8" Padding="14" Margin="0,6,0,0">
+                                <Grid Height="116">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Border x:Name="EdgePreviewThis" Background="#FCFDFF" BorderBrush="#CAD4E6" BorderThickness="1" CornerRadius="6">
+                                        <Grid ClipToBounds="True">
+                                            <TextBlock Text="Main PC" Foreground="#77869E" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Border x:Name="EdgePreview" HorizontalAlignment="Left" Width="50" Margin="0,11,0,11" IsHitTestVisible="False"/>
+                                        </Grid>
+                                    </Border>
+                                    <Border x:Name="EdgePreviewOther" Grid.Column="2" Background="#FCFDFF" BorderBrush="#CAD4E6" BorderThickness="1" CornerRadius="6">
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="Secondary PC" Foreground="#77869E" FontSize="12" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="In control" Foreground="#4263D6" FontSize="11" FontWeight="SemiBold" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="Live preview on Main · appearance is saved on this PC only"
+                                       FontSize="11" Foreground="{StaticResource MutedText}" Margin="0,7,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Content="Save screen settings" Click="EdgesSave_Click" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+                    <TextBlock x:Name="EdgeFeedback" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource MutedText}" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Padding="16,12" Margin="0,0,0,14">
+                <Expander Header="Connection tools and diagnostics">
+                    <StackPanel Margin="4,14,4,2">
+                        <WrapPanel Margin="0,0,0,12">
+                            <Button Content="Bluetooth settings" Click="Settings_Click" Margin="0,0,8,6"/>
+                            <Button Content="Find another secondary PC" Click="SearchAgain_Click" Margin="0,0,8,6"/>
+                        </WrapPanel>
+                        <TextBlock Text="Send a test message" Foreground="{StaticResource MutedText}" FontSize="12" Margin="0,0,0,6"/>
+                        <TextBox x:Name="Input" Text="Hello MouseBridge"/>
+                        <WrapPanel Margin="0,10,0,0">
+                            <Button Content="Send text" Click="Text_Click" Margin="0,0,8,6"/>
+                            <Button Content="Send binary" Click="Binary_Click" Margin="0,0,8,6"/>
+                            <Button Content="Send 100" Click="Burst_Click" Margin="0,0,8,6"/>
+                            <Button x:Name="PingButton" Content="Measure RTT" Click="Ping_Click" Margin="0,0,8,6"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Expander>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Padding="16,12">
+                <Expander Header="Activity log">
+                    <StackPanel Margin="4,12,4,2">
+                        <Button Content="Open log folder" Click="Logs_Click" HorizontalAlignment="Right" Margin="0,0,0,10"/>
+                        <TextBox x:Name="LogBox" Height="180" IsReadOnly="True" AcceptsReturn="True"
+                                 FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </Expander>
+            </Border>
+            <TextBlock Text="Keep MouseBridge running on both PCs. Minimizing keeps the connection active."
+                       Foreground="#7B879A" FontSize="12" Margin="4,14,4,0" TextWrapping="Wrap"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

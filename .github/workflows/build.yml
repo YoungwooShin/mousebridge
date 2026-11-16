@@ -1,0 +1,33 @@
+name: Build and verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet build MouseBridge.sln -c Release
+      - run: dotnet test tests/MouseBridge.Tests -c Release --no-build
+      - shell: pwsh
+        run: ./scripts/Build-Portable.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MouseBridge-Windows-x64
+          path: artifacts/MouseBridge-Portable-win-x64.zip
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./macos/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MouseBridge-macOS-universal
+          path: macos/artifacts/MouseBridge-macOS-universal-v0.3.0.zip
