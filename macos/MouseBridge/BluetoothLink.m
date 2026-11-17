@@ -10,13 +10,14 @@
 @property NSMutableArray<NSData *> *outgoing;
 @property NSData *inflight;
 @property NSUInteger offset,writeLength;
-@property BOOL writing,stopping,searching,opening,attached;
+@property BOOL writing,stopping,baseband,searching,opening,attached;
 @property NSUInteger generation;
 @property NSTimer *connectionTimer;
-@property NSDate *phaseStarted;
+@property NSTimeInterval phaseStarted;
 @property NSTimeInterval discoveryTimeout,openTimeout;
 @property MBSDPRequest *query;
 - (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
+- (void)basebandComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
 @end
 // Each asynchronous SDP request carries its own generation. Old callbacks cannot advance a reconnect.
 @interface MBSDPRequest:NSObject
@@ -24,6 +25,10 @@
 @property NSUInteger generation;
 @end
 @implementation MBSDPRequest
+- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
+ MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
+ dispatch_async(dispatch_get_main_queue(),^{[owner basebandComplete:device status:status generation:generation];});
+}
 - (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
  MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
  dispatch_async(dispatch_get_main_queue(),^{[owner queryComplete:device status:status generation:generation];});
@@ -53,9 +58,14 @@
  [[NSRunLoop mainRunLoop]addTimer:self.connectionTimer forMode:NSRunLoopCommonModes];
 }
 - (void)checkConnection {
- if(self.stopping)return;NSTimeInterval elapsed=-self.phaseStarted.timeIntervalSinceNow;
+ if(self.stopping)return;NSTimeInterval elapsed=NSProcessInfo.processInfo.systemUptime-self.phaseStarted;
+ if(self.baseband){
+  if(self.candidate.isConnected){[self trace:@"Baseband isConnected=YES (poll); proceeding to SDP."];[self beginDiscovery];return;}
+  if(elapsed>=self.openTimeout)[self finishWithError:@"Bluetooth baseband connection timed out BEFORE service discovery. Keep Windows awake with Bluetooth on, then reconnect. Copy diagnostics."];
+  return;
+ }
  if(self.searching){
-  if(elapsed>=self.discoveryTimeout){[self finishWithError:@"Service discovery timed out. Check Windows Secondary is running, then reconnect. Copy diagnostics for details."];return;}
+  if(elapsed>=self.discoveryTimeout){[self trace:[NSString stringWithFormat:@"SDP deadline: basebandConnected=%@, cachedServices=%lu",self.candidate.isConnected?@"YES":@"NO",(unsigned long)self.candidate.services.count]];[self finishWithError:@"Service discovery timed out. Check Windows Secondary is running, then reconnect. Copy diagnostics for details."];return;}
   if(elapsed>=2){IOBluetoothSDPServiceRecord *record=[self.candidate getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];if(record){[self trace:@"SDP callback pending, matching cached service found; trying its RFCOMM channel."];[self openService:record device:self.candidate];}}
  }
  else if(self.opening&&elapsed>=self.openTimeout)[self finishWithError:@"RFCOMM connection timed out. Keep Windows Secondary running and reconnect."];
@@ -68,16 +78,43 @@
  self.notification=[IOBluetoothRFCOMMChannel registerForChannelOpenNotifications:self selector:@selector(opened:channel:) withChannelID:channel direction:kIOBluetoothUserNotificationChannelDirectionIncoming];
  [self report:@"Secondary ready. Pair in system Bluetooth settings first."];
 }
+- (void)traceControllerState {
+ IOBluetoothHostController *controller=[IOBluetoothHostController defaultController];
+ [self trace:[NSString stringWithFormat:@"Controller present=%@; powerState=%ld",controller?@"YES":@"NO",controller?(long)controller.powerState:-1L]];
+}
 - (void)connect:(IOBluetoothDevice *)device {
  [self stop];self.stopping=NO;if(![device isPaired]){[self report:@"Pair the computers in system Bluetooth settings first."];return;}
- self.candidate=device;self.searching=YES;self.phaseStarted=[NSDate date];[self report:@"Discovering MouseBridge service…"];
+ self.candidate=device;
  MBSDPRequest *query=[MBSDPRequest new];query.owner=self;query.generation=self.generation;self.query=query;
- [self trace:[NSString stringWithFormat:@"SDP attempt %lu started; paired=YES; full service query; limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];
+ [self traceControllerState];
+ [self trace:[NSString stringWithFormat:@"Connection attempt %lu; paired=YES; basebandConnected=%@; cachedServices=%lu",(unsigned long)self.generation,device.isConnected?@"YES":@"NO",(unsigned long)device.services.count]];
+ if(device.isConnected){[self beginDiscovery];return;}
+ self.baseband=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
+ [self report:@"Opening authenticated Bluetooth baseband connection…"];[self watchConnection];
+ IOReturn err=[device openConnection:query withPageTimeout:0x4000 authenticationRequired:YES];
+ [self trace:[NSString stringWithFormat:@"openConnection(authRequired=YES) returned 0x%08x",(unsigned)err]];
+ // Connection-exists return codes differ between OS versions; trust the reported connected state.
+ if(err!=kIOReturnSuccess){
+  if(device.isConnected)[self beginDiscovery];
+  else [self finishWithError:[NSString stringWithFormat:@"Bluetooth baseband connection could not start (0x%08x), BEFORE service discovery. Copy diagnostics.",(unsigned)err]];
+ }
+}
+- (void)basebandComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation {
+ if(self.stopping||generation!=self.generation||!self.baseband)return;
+ if(![self sameCandidate:device]){[self trace:@"Ignored baseband callback from a different device address."];return;}
+ [self trace:[NSString stringWithFormat:@"Baseband callback: status=0x%08x; connected=%@",(unsigned)status,device.isConnected?@"YES":@"NO"]];
+ if(status!=kIOReturnSuccess&&!device.isConnected){[self finishWithError:[NSString stringWithFormat:@"Bluetooth baseband connection failed (0x%08x), BEFORE service discovery. Copy diagnostics.",(unsigned)status]];return;}
+ [self beginDiscovery];
+}
+- (void)beginDiscovery {
+ if(self.stopping||self.searching||self.opening||self.attached)return;
+ self.baseband=NO;self.searching=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
+ [self report:@"Discovering MouseBridge service…"];
+ [self trace:[NSString stringWithFormat:@"SDP attempt %lu started AFTER baseband stage; full service query; limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];
  [self watchConnection];
- // Full SDP query avoids depending on custom-UUID filtering behavior between stacks.
- IOReturn err=[device performSDPQuery:query];
+ IOReturn err=[self.candidate performSDPQuery:self.query];
  [self trace:[NSString stringWithFormat:@"performSDPQuery returned 0x%08x",(unsigned)err]];
- if(err!=kIOReturnSuccess)[self finishWithError:[NSString stringWithFormat:@"Service discovery could not start (0x%08x). Check Bluetooth permission and reconnect.",(unsigned)err]];
+ if(err!=kIOReturnSuccess)[self finishWithError:[NSString stringWithFormat:@"Service discovery could not start (0x%08x). Copy diagnostics.",(unsigned)err]];
 }
 - (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation {
  if(self.stopping||generation!=self.generation||!self.searching)return;
@@ -92,7 +129,7 @@
 - (void)openService:(IOBluetoothSDPServiceRecord *)record device:(IOBluetoothDevice *)device {
  if(!self.searching||self.stopping)return;BluetoothRFCOMMChannelID cid=0;IOReturn result=[record getRFCOMMChannelID:&cid];
  if(result!=kIOReturnSuccess||cid==0){[self finishWithError:@"MouseBridge service has no valid RFCOMM channel."];return;}
- self.searching=NO;self.opening=YES;self.phaseStarted=[NSDate date];
+ self.searching=NO;self.opening=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
  [self report:[NSString stringWithFormat:@"Connecting to MouseBridge · RFCOMM channel %u…",(unsigned)cid]];
  IOBluetoothRFCOMMChannel *opened=nil;IOReturn err=[device openRFCOMMChannelAsync:&opened withChannelID:cid delegate:self];
  [self trace:[NSString stringWithFormat:@"openRFCOMMChannelAsync returned 0x%08x; channel object=%@",(unsigned)err,opened?@"present":@"absent"]];
@@ -109,7 +146,7 @@
 }
 - (void)acceptChannel {
  if(self.stopping||self.attached)return;
- self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
+ self.baseband=NO;self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
  IOBluetoothDevice *device=[self.channel getDevice];
  [self trace:[NSString stringWithFormat:@"RFCOMM opened; paired=%@; checking authentication/encryption…",[device isPaired]?@"YES":@"NO"]];
  if(![device isPaired]||[device requestAuthentication]!=kIOReturnSuccess||[device getEncryptionMode]==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
@@ -143,6 +180,6 @@
 }
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
 - (void)stop {
- self.generation++;self.stopping=YES;self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
+ self.generation++;self.stopping=YES;self.baseband=self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
 }
 @end
