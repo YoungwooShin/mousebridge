@@ -9,7 +9,7 @@ cc -std=c11 -Wall -Wextra -Werror tests/wire_test.c -o "$out/wire-tests"
 xcrun clang -fobjc-arc -fblocks -Wall -Wextra -Wno-unused-parameter -Wno-deprecated-declarations tests/bluetooth_test.m MouseBridge/BluetoothLink.m -framework Foundation -framework IOBluetooth -framework CoreBluetooth -o "$out/bluetooth-tests"
 "$out/bluetooth-tests"
 for arch in arm64 x86_64; do
-  xcrun clang -arch "$arch" -mmacosx-version-min=13.0 -fobjc-arc -fblocks -Wall -Wextra -Wno-unused-parameter -Wno-deprecated-declarations MouseBridge/main.m MouseBridge/BluetoothLink.m MouseBridge/InputEngine.m -framework Cocoa -framework IOBluetooth -framework ApplicationServices -framework QuartzCore -o "$out/MouseBridge-$arch"
+  xcrun clang -arch "$arch" -mmacosx-version-min=13.0 -fobjc-arc -fblocks -Wall -Wextra -Wno-unused-parameter -Wno-deprecated-declarations MouseBridge/main.m MouseBridge/BluetoothLink.m MouseBridge/InputEngine.m -framework Cocoa -framework IOBluetooth -framework CoreBluetooth -framework ApplicationServices -framework QuartzCore -o "$out/MouseBridge-$arch"
 done
 lipo -create "$out/MouseBridge-arm64" "$out/MouseBridge-x86_64" -output "$out/MouseBridge.app/Contents/MacOS/MouseBridge"
 cp Info.plist "$out/MouseBridge.app/Contents/Info.plist"

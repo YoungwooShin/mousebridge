@@ -99,7 +99,7 @@
  return [IOBluetoothRFCOMMChannel registerForChannelOpenNotifications:target selector:@selector(opened:channel:)];
 }
 - (void)listen {
- [self stop];self.stopping=NO;
+ [self stop];self.stopping=NO;[self traceControllerState];
  NSDictionary *dict=[MBBluetoothLink serviceDictionary];
  self.record=[self publishRecord:dict];BluetoothRFCOMMChannelID channel=0;
  if(!self.record||[self.record getRFCOMMChannelID:&channel]!=kIOReturnSuccess){[self report:@"Cannot advertise RFCOMM. Check Bluetooth permission and radio."];[self stop];return;}
@@ -113,6 +113,7 @@
 }
 - (void)traceControllerState {
  IOBluetoothHostController *controller=[IOBluetoothHostController defaultController];
+ [self trace:[NSString stringWithFormat:@"Bluetooth authorization=%ld (0=notDetermined, 1=restricted, 2=denied, 3=allowed)",(long)CBManager.authorization]];
  [self trace:[NSString stringWithFormat:@"Controller present=%@; powerState=%ld",controller?@"YES":@"NO",controller?(long)controller.powerState:-1L]];
 }
 - (void)connect:(IOBluetoothDevice *)device {
