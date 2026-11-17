@@ -60,3 +60,11 @@ Windows remains at0.3.0 and uses the same input protocol3. Update the Mac app to
 To retest: quit the old Mac app, replace it in Applications, start **Secondary PC** in Windows first and confirm advertising, then on Mac choose **Main PC**, refresh paired devices, select the Windows PC and **Connect / reconnect** once. The Mac window title must show0.3.1. If connection fails, copy diagnostics and the Windows Activity log (remove diagnostic test strings and personal identifiers before sharing).
 
 This fixes unbounded/opaque waiting and wrapper identity handling. The reported real-device discovery failure's exact cause is not yet proven, and successful Mac–Windows Bluetooth connection is not claimed from compilation or mocked-device tests.
+
+## macOS0.3.2: separate baseband and SDP stages
+
+When the paired device is not already connected, Mac Main first requests an **authenticated baseband connection**, asynchronously, before issuing SDP. An already connected device proceeds directly to service search; the RFCOMM authentication/encryption checks still apply. The baseband/open deadlines are15s each, SDP20s, on a monotonic clock. Shared OS baseband connections are not forcibly closed by Stop.
+
+Diagnostics distinguish controller presence/power state, pairing/connected state, baseband request/callback errors, SDP request/completion/cache state and RFCOMM opening. Device names, addresses, keys and clipboard text are not included. `isConnected` is a Bluetooth transport state, not proof that MouseBridge input control has been established.
+
+Native mocked-device tests cover authenticated baseband-before-SDP order, baseband timeout/start error, connection-exists handling, stale baseband callbacks and connected-flag polling when a callback is absent, in addition to the previous SDP tests. These tests do not prove that the reported physical Mac–Windows timeout is resolved.

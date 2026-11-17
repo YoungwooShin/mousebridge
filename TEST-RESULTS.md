@@ -1,5 +1,12 @@
 # MouseBridge verification
 
+## Mac0.3.2 baseband-first diagnostics — 2026-11-17
+
+[Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44094869978), source `6060795c4a42ac3ba4374bdd93db5ea102ccf321`: portable wire tests and11 mocked-device scenarios passed (five SDP plus six baseband sequencing/timeout/error/reconnect/polling cases). Native arm64/x86_64 build and Apple ad-hoc signature verification passed. Controller state logging is mocked in tests; no radio or permission access is exercised.
+
+Production now uses an asynchronous authenticated baseband open when not already connected, followed by bounded SDP and RFCOMM phases with monotonic deadlines. Encryption/authentication checks remain in place. ZIP SHA256 `6f5c70fefbf3803b3dc689ea69a7a04a53ab28a6802580fd93787fd7594cf122`. This is a connection-order change and diagnostic improvement, not a proven fix of the reported physical device timeout. Windows download remains0.3.0.
+
+
 ## macOS0.3.1 connection diagnostics — 2026-11-17
 
 [Native CI run](https://github.com/YoungwooShin/mousebridge/actions/runs/44091877849), source `a5e93ad2cfa4866dca4f9a80608b9a12b558f84a`: macOS C wire tests plus five mocked-device discovery scenarios passed: missing callback timeout, a different wrapper with the same Bluetooth address, stale callback after reconnect, channel-open timeout, immediate SDP start error. Native universal build/ad-hoc codesign verification passed. Windows build and111 existing unit tests also passed.
