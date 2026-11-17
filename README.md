@@ -1,5 +1,7 @@
 # MouseBridge
 
+> **Mac status (2026-11-17): unresolved on the reported macOS26.6.2–Windows setup.** Windows reports service discovery/protected socket success, but Mac0.3.4 has no incoming/approval markers and input control is not confirmed. Native build/mocked tests passing is not an interoperability result. [Investigation and work log](MACOS-INVESTIGATION.md).
+
 **One keyboard and mouse for two computers, directly over Bluetooth.** No shared Wi-Fi, internet connection, VPN or relay server is needed for device-to-device communication.
 
 [한국어 안내](README.ko.md) · [Website / Downloads](https://youngwooshin.github.io/mousebridge) · [MIT license](LICENSE) · [Test results](TEST-RESULTS.md)
@@ -11,7 +13,7 @@ Get **Windows v0.3.0 / Mac v0.3.4** downloads on the [website](https://youngwoos
 | Pairing | Implementation | Verification |
 | --- | --- | --- |
 | Windows → Windows | Main and Secondary, custom shortcuts, edge handoff, text clipboard | Earlier user hardware tests confirmed input sharing; new indicator UI still requires Windows testing |
-| Windows ↔ Mac | Both Main/Secondary roles implemented using common RFCOMM protocol | Native universal Mac CI build/signature verification completed; **not hardware-tested** |
+| Windows ↔ Mac | Both Main/Secondary roles implemented using common RFCOMM protocol | Native build/signature verified; reported macOS26.6.2–Windows input control unresolved; see investigation |
 | Mac → Mac | Same Mac app on both computers, one Main and one Secondary | **Not hardware-tested** |
 
 This is an experimental, unsigned/ad-hoc signed prototype, not a security-reviewed remote administration product. macOS support is an experimental port with feature gaps, not feature parity. See [Mac instructions](macos/README.md) and [security](SECURITY.md).

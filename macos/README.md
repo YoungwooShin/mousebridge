@@ -1,5 +1,7 @@
 # MouseBridge for macOS — experimental preview
 
+> **Current hardware report: unresolved.** Mac0.3.4 publishes its service and reports allowed Bluetooth access, but shows no incoming/approval progression while Windows reports a protected connection. Do not treat this as a usable/verified Mac input-sharing release. See [investigation/work log](../MACOS-INVESTIGATION.md).
+
 Native Objective-C/AppKit port using Apple's IOBluetooth Classic RFCOMM APIs. It uses the same service UUID, bounded length-prefixed framing and version-3 control/clipboard messages as the Windows app. The universal app contains Apple silicon and Intel binaries, targeting macOS 13+.
 
 **Build success does not establish that Bluetooth service advertising, pairing/encryption, TCC permissions or input injection work on real Macs. Neither Mac–Windows nor Mac–Mac has been hardware-tested here.** The GitHub Pages download now comes from the successful native macOS CI build, including Apple clang universal compilation and Apple ad-hoc codesign verification. See [CI run](https://github.com/YoungwooShin/mousebridge/actions/runs/43866604334). Earlier Linux cross-build evidence is retained as historical information. Native CI did not launch the GUI or exercise Bluetooth/input permissions.

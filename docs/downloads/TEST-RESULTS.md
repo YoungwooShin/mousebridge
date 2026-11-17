@@ -1,5 +1,9 @@
 # MouseBridge verification
 
+## Reported device test — unresolved, 2026-11-17
+
+[Investigation and work log](MACOS-INVESTIGATION.md): Windows0.3.0 fresh search/protected socket success was reported at23:42:10 KST. A subsequent Mac0.3.4 diagnostic copy has allowed Bluetooth authorization, controller/listener/service registration, but no new receiving/approval records after23:41:38 KST. Mac input control is not confirmed. No packet trace establishes the exact failing layer. The passing native/mocked tests below do not prove physical interoperability.
+
 ## Mac0.3.4 incoming/approval handoff — 2026-11-17
 
 [Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44103787737), source `b52dacb505bb0f200c46a90bd62748ce1d72b1ea`: native wire/SDP tests and existing connection mocks passed; new incoming mocks cover unrelated/outgoing/stale notification isolation, duplicate safety, occupied-service rejection, ordered pre-approval buffering with once-only delivery and overflow limits, plus background-thread incoming/data dispatch to main. Native universal build and Apple ad-hoc signature verification passed. Windows build and111 tests passed.

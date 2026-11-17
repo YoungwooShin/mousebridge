@@ -1,5 +1,7 @@
 # MouseBridge
 
+> **Mac 현재 상태(2026-11-17): 보고된 macOS26.6.2–Windows 조합에서 해결되지 않았습니다.** Windows는 서비스 검색·보호된 소켓 연결 성공을 보고하지만 Mac0.3.4에는 수신·승인 기록이 없고 입력 제어가 확인되지 않았습니다. 빌드·모의 테스트 성공과 실기기 성공을 구분합니다. [조사 및 작업 기록](MACOS-INVESTIGATION.md).
+
 **블루투스로 두 컴퓨터의 키보드·마우스와 텍스트 클립보드를 공유합니다.** 통신에 같은 와이파이, 인터넷, VPN, 중계 서버가 필요하지 않습니다.
 
 [English](README.md) · [한글 사이트 / 다운로드](https://youngwooshin.github.io/mousebridge/ko/) · [MIT 라이선스](LICENSE) · [테스트 결과](TEST-RESULTS.md)
