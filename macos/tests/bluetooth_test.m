@@ -131,6 +131,16 @@ int main(void){@autoreleasepool{
  [server.incomingTarget opened:(id)server.testNotification channel:(id)pending];
  for(int i=0;i<129;i++)[server rfcommChannelData:(id)pending data:frameA length:sizeof(frameA)];
  assert([serverState containsString:@"pending-approval buffer"]);assert(pending.closes==1);assert(messages.count==2);[server stop];
+ // Driver callbacks on a background thread must reach AppKit/application callbacks on main.
+ MBTestLink *threaded=[[MBTestLink alloc]initWithDiscoveryTimeout:.04 openTimeout:.04];__block int threadConnects=0,threadMessages=0;
+ threaded.connected=^{assert(NSThread.isMainThread);threadConnects++;[threaded startReceiving];};
+ threaded.message=^(uint8_t kind,NSData *payload){assert(NSThread.isMainThread);assert(kind==1);threadMessages++;};
+ [threaded listen];id observer=threaded.incomingTarget;id note=threaded.testNotification;
+ MBFakeChannel *threadChannel=[MBFakeChannel new];threadChannel.channelID=7;threadChannel.incoming=YES;threadChannel.openStatus=YES;threadChannel.peer=device();
+ NSData *threadFrame=[NSData dataWithBytes:frameA length:sizeof(frameA)];
+ dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT,0),^{[observer opened:note channel:(id)threadChannel];[threaded rfcommChannelData:(id)threadChannel data:(void *)threadFrame.bytes length:threadFrame.length];});
+ spin(.35);assert(threadConnects==1&&threadMessages==1);[threaded stop];threaded.connected=nil;
+ puts("PASS: background incoming/data callbacks normalized to main before application/UI use (no radio)");
  puts("PASS: incoming channel/direction/generation guards, duplicate safety, busy rejection, approval-buffer ordering/once-only delivery and bounded overflow (no radio)");
  puts("PASS: authenticated baseband before SDP, ACL timeout/error, connection-exists, stale ACL callback, success-with-disconnected rejection and connected-flag polling (no radio)");
  puts("PASS: SDP callback timeout, address-wrapper identity, stale generation, channel-open timeout and immediate error recovery (no radio)");

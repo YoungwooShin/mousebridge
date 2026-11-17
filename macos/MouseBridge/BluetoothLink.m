@@ -46,7 +46,9 @@
 @end
 @implementation MBIncomingRequest
 - (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel {
- [self.owner opened:notification channel:channel generation:self.generation];
+ MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
+ if(NSThread.isMainThread)[owner opened:notification channel:channel generation:generation];
+ else dispatch_async(dispatch_get_main_queue(),^{[owner opened:notification channel:channel generation:generation];});
 }
 @end
 @implementation MBBluetoothLink
@@ -188,6 +190,7 @@
  [self acceptChannel];
 }
 - (void)rfcommChannelOpenComplete:(IOBluetoothRFCOMMChannel *)channel status:(IOReturn)error {
+ if(!NSThread.isMainThread){dispatch_async(dispatch_get_main_queue(),^{[self rfcommChannelOpenComplete:channel status:error];});return;}
  if(self.stopping||!self.opening||![self sameCandidate:[channel getDevice]])return;
  self.channel=channel;if(error!=kIOReturnSuccess){[self finishWithError:[NSString stringWithFormat:@"RFCOMM open failed (0x%08x).",(unsigned)error]];return;}[self acceptChannel];
 }
@@ -213,11 +216,17 @@
  if(err!=kIOReturnSuccess){[self report:@"Bluetooth send failed."];[self stop];}
 }
 - (void)rfcommChannelWriteComplete:(IOBluetoothRFCOMMChannel *)channel refcon:(void *)refcon status:(IOReturn)error {
+ if(!NSThread.isMainThread){dispatch_async(dispatch_get_main_queue(),^{[self rfcommChannelWriteComplete:channel refcon:refcon status:error];});return;}
  if(channel!=self.channel)return;self.writing=NO;
  if(error!=kIOReturnSuccess){[self report:@"Bluetooth send failed."];[self stop];return;}
  self.offset+=self.writeLength;if(self.offset==self.inflight.length){[self.outgoing removeObjectAtIndex:0];self.offset=0;self.inflight=nil;}[self pump];
 }
 - (void)rfcommChannelData:(IOBluetoothRFCOMMChannel *)channel data:(void *)bytes length:(size_t)length {
+ if(!NSThread.isMainThread){
+  if(length>MB_MAX_PAYLOAD+5){dispatch_async(dispatch_get_main_queue(),^{if(channel==self.channel)[self finishWithError:@"Receive buffer limit exceeded."];});return;}
+  NSData *copy=[NSData dataWithBytes:bytes length:length];
+  dispatch_async(dispatch_get_main_queue(),^{[self rfcommChannelData:channel data:(void *)copy.bytes length:copy.length];});return;
+ }
  if(channel!=self.channel)return;
  if(length>MB_MAX_PAYLOAD+5||self.received.length+length>2*(MB_MAX_PAYLOAD+5)){[self report:@"Receive buffer limit exceeded."];[self stop];return;}
  [self.received appendBytes:bytes length:length];
@@ -235,7 +244,8 @@
  NSUInteger generation=self.generation;[self trace:[NSString stringWithFormat:@"Application input engine ready; releasing %lu buffered messages",(unsigned long)queued.count]];
  for(NSDictionary *message in queued){if(self.stopping||generation!=self.generation||!self.ready)break;if(self.message)self.message([message[@"kind"] unsignedCharValue],message[@"payload"]);}
 }
-- (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
+- (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {
+ if(!NSThread.isMainThread){dispatch_async(dispatch_get_main_queue(),^{[self rfcommChannelClosed:channel];});return;}if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
 - (void)stop {
  self.generation++;self.stopping=YES;self.listening=self.receiveReady=NO;self.serverChannel=0;self.incoming=nil;[self.pendingIncoming removeAllObjects];self.pendingBytes=0;self.baseband=self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
 }
