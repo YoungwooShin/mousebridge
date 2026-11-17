@@ -6,7 +6,7 @@
 
 ## 다운로드와 지원 범위
 
-[배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 Windows0.3.0 / Mac0.3.2를 받습니다.
+[배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 Windows0.3.0 / Mac0.3.3을 받습니다.
 
 - **Windows ↔ Windows:** 기존 시제품. 무설치 ZIP에 `MouseBridge.exe` 하나만 있습니다. 새 경계 표시 UI는 실제 Windows 확인이 필요합니다.
 - **Mac ↔ Windows, Mac ↔ Mac:** 양쪽 역할을 구현한 실험적 Mac 포트입니다. Apple silicon·Intel 통합 앱의 네이티브 CI 빌드와 임시 서명 검사를 통과했으나, 실제 Mac 실행·블루투스·입력 동작은 아직 검증하지 못했습니다.
@@ -43,3 +43,5 @@ MIT는 수정·재배포·상업적 이용을 허용하며 저작권·라이선�
 Mac0.3.1은 서비스 검색 시간 초과와 장치 주소 비교, 늦은 콜백 무시, **Copy connection diagnostics** 버튼을 추가했습니다. 네이티브 빌드와 모의 장치 테스트는 통과했으며 실제 연결 성공 여부는 다시 시험해야 합니다. Windows는0.3.0 그대로 사용할 수 있습니다.
 
 Mac0.3.2는 필요할 때 인증을 요구하는 기본 Bluetooth 연결을 먼저 만든 후 서비스 검색을 시작합니다. 기본 연결·검색·RFCOMM 단계를 구분해 진단합니다. 네이티브 모의 장치 테스트는 통과했으며 실제 Mac–Windows 문제 해결 여부는 재시험이 필요합니다. Windows0.3.0은 그대로 사용할 수 있습니다.
+
+Mac0.3.3은 RFCOMM 서비스 광고의 채널 번호를1바이트로 수정하고 기본 연결 확인 후 검색하도록 보완했습니다. macOS26.6.2–Windows 서비스 검색 실패가 보고되어 실제 해결 여부는 재시험이 필요합니다. 반대 방향 시험 시 Windows의 **Find another secondary PC**로 저장된 상대를 지우고 새로 검색하세요.

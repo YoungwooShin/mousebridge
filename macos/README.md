@@ -68,3 +68,11 @@ When the paired device is not already connected, Mac Main first requests an **au
 Diagnostics distinguish controller presence/power state, pairing/connected state, baseband request/callback errors, SDP request/completion/cache state and RFCOMM opening. Device names, addresses, keys and clipboard text are not included. `isConnected` is a Bluetooth transport state, not proof that MouseBridge input control has been established.
 
 Native mocked-device tests cover authenticated baseband-before-SDP order, baseband timeout/start error, connection-exists handling, stale baseband callbacks and connected-flag polling when a callback is absent, in addition to the previous SDP tests. These tests do not prove that the reported physical Mac–Windows timeout is resolved.
+
+## macOS0.3.3: SDP advertisement correction and confirmed connection state
+
+The previous Mac service dictionary used an NSNumber shortcut for the RFCOMM server channel. Apple's actual SDP parser confirms that shortcut becomes a32-bit unsigned element; the RFCOMM channel must be uint8. The advertisement now uses an explicitly typed one-byte value and public browse group, and the listener checks that channel-open notification registration succeeded. Native tests reproduce the old width4 and verify the corrected width1 without accessing a radio.
+
+A successful baseband callback with `isConnected=NO` no longer advances to SDP: the existing baseband deadline remains active until connected state is confirmed. This fixes misleading phase progression; it does not establish why the physical Mac–Windows connection is failing.
+
+Reported hardware status: macOS26.6.2 with Windows has shown service-search timeouts. Windows Main also reported services=0, but it may have reused a saved peer. To retest the reverse direction on0.3.3: choose **Secondary PC** on Mac, then Windows **Connection tools and diagnostics → Find another secondary PC**. That button clears the saved peer and performs a fresh service search. Share the new Mac **Copy connection diagnostics** and Windows Activity log if no connection is established. This is an isolation test, not a change to the desired final Mac-Main input direction.

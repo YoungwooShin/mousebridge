@@ -2,6 +2,8 @@
 74b270e5f60b8509bcccff66a2f28cab6b73dd1d0aa8816d26dd1af44c55a998  MouseBridge-macOS-universal-v0.3.0.zip
 4d0cc77c5043c3be4cabc3916e2362b1f9ad335763c63348da509826c3aa541d  MouseBridge-macOS-universal-v0.3.1.zip
 6f5c70fefbf3803b3dc689ea69a7a04a53ab28a6802580fd93787fd7594cf122  MouseBridge-macOS-universal-v0.3.2.zip
+930e988e6810014cf1e989d06835c77391823e7c2ebe7339842dc0ac952777cf  MouseBridge-macOS-universal-v0.3.3.zip
 5f326d43d9ac7a0fc818251faac1734ba3fed222c0e66fcf447d873d7870b55f  MouseBridge-source-v0.3.0.zip
 4795fddcb800b473eac9cdc5f4425095a1f0898f9bf64901f6cf2d8f050a85a4  MouseBridge-source-v0.3.1.zip
 c36a99f175fdae1b0646494b57e9f318b646f8ccd2cac77d7b4f388313977565  MouseBridge-source-v0.3.2.zip
+48b5127f6b6d4c809ae13f859d0eb03c7bec228534607c32b6d877c2c0cec0f4  MouseBridge-source-v0.3.3.zip

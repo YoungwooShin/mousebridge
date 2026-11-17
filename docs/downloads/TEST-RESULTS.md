@@ -1,5 +1,12 @@
 # MouseBridge verification
 
+## Mac0.3.3 advertisement/connection-state correction — 2026-11-17
+
+[Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44097594111), source `95bff13e7c4fa1811f9a5b0343ac145a76028c80` (merged via PR1, identical Mac/workflow source): actual Apple SDP parsing reproduces old NSNumber channel width4 and verifies corrected uint8 width1. Twelve mocked-device scenarios and wire tests passed, including a success callback with disconnected state that must not start SDP. Native universal build/Apple ad-hoc signature verification and Windows111 tests passed.
+
+ZIP SHA256 `930e988e6810014cf1e989d06835c77391823e7c2ebe7339842dc0ac952777cf`. No hardware connection success is claimed: user reports on macOS26.6.2–Windows include disconnected state after a successful callback and service-search failures in both directions. Windows reverse-search logs may involve a saved peer; fresh-target testing is required. The corrected Mac advertisement is a confirmed format bug; its effect on the observed physical failures remains to be tested.
+
+
 ## Mac0.3.2 baseband-first diagnostics — 2026-11-17
 
 [Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44094869978), source `6060795c4a42ac3ba4374bdd93db5ea102ccf321`: portable wire tests and11 mocked-device scenarios passed (five SDP plus six baseband sequencing/timeout/error/reconnect/polling cases). Native arm64/x86_64 build and Apple ad-hoc signature verification passed. Controller state logging is mocked in tests; no radio or permission access is exercised.
