@@ -6,7 +6,7 @@
 
 ## 다운로드와 지원 범위
 
-[배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 v0.3.0을 받습니다.
+[배포 사이트](https://youngwooshin.github.io/mousebridge/ko/#downloads)에서 Windows0.3.0 / Mac0.3.1을 받습니다.
 
 - **Windows ↔ Windows:** 기존 시제품. 무설치 ZIP에 `MouseBridge.exe` 하나만 있습니다. 새 경계 표시 UI는 실제 Windows 확인이 필요합니다.
 - **Mac ↔ Windows, Mac ↔ Mac:** 양쪽 역할을 구현한 실험적 Mac 포트입니다. Apple silicon·Intel 통합 앱의 네이티브 CI 빌드와 임시 서명 검사를 통과했으나, 실제 Mac 실행·블루투스·입력 동작은 아직 검증하지 못했습니다.
@@ -39,3 +39,5 @@ Windows 빌드 경고·오류 0개, 단위 테스트 **111개 통과**. Mac의 C
 신뢰하는 기기끼리만 사용하세요. 전환 시 민감한 클립보드 텍스트도 전달될 수 있으며 회사 정책을 지켜야 합니다. 관리자 앱, 로그인·보안 화면 등은 지원 범위 밖이고 보안 감사를 완료한 제품이 아닙니다. 설정과 로그는 Windows의 `%LOCALAPPDATA%\MouseBridge`에 남습니다.
 
 MIT는 수정·재배포·상업적 이용을 허용하며 저작권·라이선스 표시 유지가 필요합니다. 원본 소스는 [MIT](LICENSE), 포함된 외부 구성 요소는 각자의 라이선스를 따릅니다.
+
+Mac0.3.1은 서비스 검색 시간 초과와 장치 주소 비교, 늦은 콜백 무시, **Copy connection diagnostics** 버튼을 추가했습니다. 네이티브 빌드와 모의 장치 테스트는 통과했으며 실제 연결 성공 여부는 다시 시험해야 합니다. Windows는0.3.0 그대로 사용할 수 있습니다.

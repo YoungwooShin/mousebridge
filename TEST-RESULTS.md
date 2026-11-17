@@ -1,4 +1,12 @@
-# MouseBridge v0.3.0 verification
+# MouseBridge verification
+
+## macOS0.3.1 connection diagnostics — 2026-11-17
+
+[Native CI run](https://github.com/YoungwooShin/mousebridge/actions/runs/44091877849), source `a5e93ad2cfa4866dca4f9a80608b9a12b558f84a`: macOS C wire tests plus five mocked-device discovery scenarios passed: missing callback timeout, a different wrapper with the same Bluetooth address, stale callback after reconnect, channel-open timeout, immediate SDP start error. Native universal build/ad-hoc codesign verification passed. Windows build and111 existing unit tests also passed.
+
+Mac ZIP SHA256: `4d0cc77c5043c3be4cabc3916e2362b1f9ad335763c63348da509826c3aa541d`. The main app now uses a full SDP query with20s search /15s channel-open deadlines and sanitized diagnostics copying; authentication/encryption checks are retained. The cached-service fallback still requires real-device testing. No Mac–Windows connection success is claimed; exact cause of the reported live discovery hang is not established. Windows download stays0.3.0, input protocol3 unchanged.
+
+## v0.3.0 verification history
 
 ## Native GitHub Actions verification (2026-11-16)
 

@@ -47,3 +47,16 @@ cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined macos/tests/wire_
 ```
 
 CI definition: `.github/workflows/build.yml`. Real-device acceptance tests are in `TEST-RESULTS.md`.
+
+## macOS 0.3.1 service-discovery diagnostics
+
+Windows remains at0.3.0 and uses the same input protocol3. Update the Mac app to0.3.1 for this diagnostic fix.
+
+- Search requests query the full SDP service list, then select MouseBridge's UUID.
+- Callback devices are matched by Bluetooth address rather than Objective-C wrapper identity. Old request callbacks are ignored after reconnect.
+- Discovery times out after20s; channel opening has a separate15s limit. A matching cached service may be attempted after2s while a callback is pending; this is a fallback, not proof that discovery succeeded or a change to authentication/encryption requirements.
+- **Copy connection diagnostics** copies phase/status/SDK error information. It does not collect input, clipboard text, device names or Bluetooth addresses.
+
+To retest: quit the old Mac app, replace it in Applications, start **Secondary PC** in Windows first and confirm advertising, then on Mac choose **Main PC**, refresh paired devices, select the Windows PC and **Connect / reconnect** once. The Mac window title must show0.3.1. If connection fails, copy diagnostics and the Windows Activity log (remove diagnostic test strings and personal identifiers before sharing).
+
+This fixes unbounded/opaque waiting and wrapper identity handling. The reported real-device discovery failure's exact cause is not yet proven, and successful Mac–Windows Bluetooth connection is not claimed from compilation or mocked-device tests.
