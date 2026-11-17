@@ -179,7 +179,7 @@
 - (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel generation:(NSUInteger)generation {
  // Never close a channel belonging to another app, an old registration or a different service.
  if(self.stopping||!self.listening||generation!=self.generation)return;
- if([channel getChannelID]!=self.serverChannel)return;
+ if([channel getChannelID]!=self.serverChannel){[self trace:@"RFCOMM open notification ignored: channel does not match this service (no peer details logged)."];return;}
  [self trace:[NSString stringWithFormat:@"RFCOMM open notification: matching channel=%u; incoming=%@; mainThread=%@",(unsigned)self.serverChannel,[channel isIncoming]?@"YES":@"NO",NSThread.isMainThread?@"YES":@"NO"]];
  if(![channel isIncoming]){[self trace:@"Ignoring outgoing channel notification."];return;}
  if(channel==self.channel){[self trace:@"Duplicate notification for active channel ignored."];return;}
@@ -199,7 +199,10 @@
  self.baseband=NO;self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
  IOBluetoothDevice *device=[self.channel getDevice];
  [self trace:[NSString stringWithFormat:@"RFCOMM opened; paired=%@; checking authentication/encryption…",[device isPaired]?@"YES":@"NO"]];
- if(![device isPaired]||[device requestAuthentication]!=kIOReturnSuccess||[device getEncryptionMode]==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
+ BOOL paired=[device isPaired];IOReturn authentication=paired?[device requestAuthentication]:kIOReturnNotPermitted;
+ BluetoothHCIEncryptionMode encryption=[device getEncryptionMode];
+ [self trace:[NSString stringWithFormat:@"RFCOMM security: paired=%@; authentication=0x%08x; encryptionMode=%u",paired?@"YES":@"NO",(unsigned)authentication,(unsigned)encryption]];
+ if(!paired||authentication!=kIOReturnSuccess||encryption==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
  self.attached=YES;self.receiveReady=NO;[self report:@"Encrypted Bluetooth connected"];
  if(self.connected)self.connected();
 }
