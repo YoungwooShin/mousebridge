@@ -1,5 +1,6 @@
 #import "BluetoothLink.h"
 #import "Wire.h"
+@class MBSDPRequest;
 @interface MBBluetoothLink ()
 @property IOBluetoothRFCOMMChannel *channel;
 @property IOBluetoothSDPServiceRecord *record;
@@ -9,15 +10,56 @@
 @property NSMutableArray<NSData *> *outgoing;
 @property NSData *inflight;
 @property NSUInteger offset,writeLength;
-@property BOOL writing,stopping;
+@property BOOL writing,stopping,searching,opening,attached;
+@property NSUInteger generation;
+@property NSTimer *connectionTimer;
+@property NSDate *phaseStarted;
+@property NSTimeInterval discoveryTimeout,openTimeout;
+@property MBSDPRequest *query;
+- (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
+@end
+// Each asynchronous SDP request carries its own generation. Old callbacks cannot advance a reconnect.
+@interface MBSDPRequest:NSObject
+@property(weak) MBBluetoothLink *owner;
+@property NSUInteger generation;
+@end
+@implementation MBSDPRequest
+- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
+ MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
+ dispatch_async(dispatch_get_main_queue(),^{[owner queryComplete:device status:status generation:generation];});
+}
+@end
+@interface MBBluetoothLink ()
 @end
 @implementation MBBluetoothLink
 + (IOBluetoothSDPUUID *)serviceUUID {const unsigned char bytes[]={0x9d,0x96,0xd1,0xbd,0x27,0x86,0x4b,0x5d,0x97,0xe7,0xcf,0x84,0x39,0x48,0x43,0xaf};return [IOBluetoothSDPUUID uuidWithBytes:bytes length:16];}
 + (NSArray *)pairedDevices {return [IOBluetoothDevice pairedDevices]?:@[];}
-- (instancetype)init {if((self=[super init])){_received=[NSMutableData data];_outgoing=[NSMutableArray array];}return self;}
+- (instancetype)init {return [self initWithDiscoveryTimeout:20 openTimeout:15];}
+- (instancetype)initWithDiscoveryTimeout:(NSTimeInterval)discoveryTimeout openTimeout:(NSTimeInterval)openTimeout {
+ if((self=[super init])){_received=[NSMutableData data];_outgoing=[NSMutableArray array];_discoveryTimeout=MAX(discoveryTimeout,.02);_openTimeout=MAX(openTimeout,.02);}return self;
+}
 - (NSString *)peerName{return [[self.channel getDevice] nameOrAddress]?:@"Paired computer";}
 - (BOOL)ready{return self.channel!=nil&&[self.channel isOpen];}
-- (void)report:(NSString *)text{if(self.state)self.state(text);}
+- (void)trace:(NSString *)text{if(self.diagnostic)self.diagnostic(text);}
+- (void)report:(NSString *)text{[self trace:text];if(self.state)self.state(text);}
+- (void)finishWithError:(NSString *)text {[self stop];[self report:text];}
+- (BOOL)sameCandidate:(IOBluetoothDevice *)device {
+ NSString *expected=self.candidate.addressString,*actual=device.addressString;
+ return expected.length>0&&actual.length>0&&[expected caseInsensitiveCompare:actual]==NSOrderedSame;
+}
+- (void)watchConnection {
+ [self.connectionTimer invalidate];__weak MBBluetoothLink *weak=self;
+ self.connectionTimer=[NSTimer timerWithTimeInterval:.25 repeats:YES block:^(NSTimer *timer){[weak checkConnection];}];
+ [[NSRunLoop mainRunLoop]addTimer:self.connectionTimer forMode:NSRunLoopCommonModes];
+}
+- (void)checkConnection {
+ if(self.stopping)return;NSTimeInterval elapsed=-self.phaseStarted.timeIntervalSinceNow;
+ if(self.searching){
+  if(elapsed>=self.discoveryTimeout){[self finishWithError:@"Service discovery timed out. Check Windows Secondary is running, then reconnect. Copy diagnostics for details."];return;}
+  if(elapsed>=2){IOBluetoothSDPServiceRecord *record=[self.candidate getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];if(record){[self trace:@"SDP callback pending, matching cached service found; trying its RFCOMM channel."];[self openService:record device:self.candidate];}}
+ }
+ else if(self.opening&&elapsed>=self.openTimeout)[self finishWithError:@"RFCOMM connection timed out. Keep Windows Secondary running and reconnect."];
+}
 - (void)listen {
  [self stop];self.stopping=NO;
  NSDictionary *dict=@{@"0001 - ServiceClassIDList":@[[MBBluetoothLink serviceUUID]],@"0004 - ProtocolDescriptorList":@[@[[IOBluetoothSDPUUID uuid16:0x0100]],@[[IOBluetoothSDPUUID uuid16:0x0003],@3]],@"0100 - ServiceName":@"MouseBridge",@"LocalAttributes":@{@"Persistent":@NO}};
@@ -28,27 +70,50 @@
 }
 - (void)connect:(IOBluetoothDevice *)device {
  [self stop];self.stopping=NO;if(![device isPaired]){[self report:@"Pair the computers in system Bluetooth settings first."];return;}
- self.candidate=device;[self report:@"Discovering MouseBridge service…"];
- IOReturn err=[device performSDPQuery:self uuids:@[[MBBluetoothLink serviceUUID]]];if(err!=kIOReturnSuccess){[self report:@"Service discovery could not start."];[self stop];}
+ self.candidate=device;self.searching=YES;self.phaseStarted=[NSDate date];[self report:@"Discovering MouseBridge service…"];
+ MBSDPRequest *query=[MBSDPRequest new];query.owner=self;query.generation=self.generation;self.query=query;
+ [self trace:[NSString stringWithFormat:@"SDP attempt %lu started; paired=YES; full service query; limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];
+ [self watchConnection];
+ // Full SDP query avoids depending on custom-UUID filtering behavior between stacks.
+ IOReturn err=[device performSDPQuery:query];
+ [self trace:[NSString stringWithFormat:@"performSDPQuery returned 0x%08x",(unsigned)err]];
+ if(err!=kIOReturnSuccess)[self finishWithError:[NSString stringWithFormat:@"Service discovery could not start (0x%08x). Check Bluetooth permission and reconnect.",(unsigned)err]];
 }
-- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
- if(self.stopping||device!=self.candidate)return;
- IOBluetoothSDPServiceRecord *record=[device getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];BluetoothRFCOMMChannelID cid=0;
- if(status!=kIOReturnSuccess||!record||[record getRFCOMMChannelID:&cid]!=kIOReturnSuccess){[self report:@"No service found. Start Secondary on the other computer, then reconnect."];return;}
- IOBluetoothRFCOMMChannel *opened=nil;IOReturn err=[device openRFCOMMChannelAsync:&opened withChannelID:cid delegate:self];self.channel=opened;
- if(err!=kIOReturnSuccess){[self report:@"RFCOMM connection failed."];[self stop];}
+- (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation {
+ if(self.stopping||generation!=self.generation||!self.searching)return;
+ if(![self sameCandidate:device]){[self trace:@"Ignored SDP callback from a different device address."];return;}
+ [self trace:[NSString stringWithFormat:@"SDP completed: status=0x%08x, services=%lu",(unsigned)status,(unsigned long)device.services.count]];
+ if(status!=kIOReturnSuccess){[self finishWithError:[NSString stringWithFormat:@"Service discovery failed (0x%08x). Restart Windows Secondary and reconnect.",(unsigned)status]];return;}
+ IOBluetoothSDPServiceRecord *record=[device getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];
+ if(!record)record=[self.candidate getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];
+ if(!record){[self finishWithError:@"No MouseBridge service found. Choose Secondary PC in the Windows app before connecting."];return;}
+ [self openService:record device:device];
+}
+- (void)openService:(IOBluetoothSDPServiceRecord *)record device:(IOBluetoothDevice *)device {
+ if(!self.searching||self.stopping)return;BluetoothRFCOMMChannelID cid=0;IOReturn result=[record getRFCOMMChannelID:&cid];
+ if(result!=kIOReturnSuccess||cid==0){[self finishWithError:@"MouseBridge service has no valid RFCOMM channel."];return;}
+ self.searching=NO;self.opening=YES;self.phaseStarted=[NSDate date];
+ [self report:[NSString stringWithFormat:@"Connecting to MouseBridge · RFCOMM channel %u…",(unsigned)cid]];
+ IOBluetoothRFCOMMChannel *opened=nil;IOReturn err=[device openRFCOMMChannelAsync:&opened withChannelID:cid delegate:self];
+ [self trace:[NSString stringWithFormat:@"openRFCOMMChannelAsync returned 0x%08x; channel object=%@",(unsigned)err,opened?@"present":@"absent"]];
+ if(self.stopping)return;self.channel=opened;
+ if(err!=kIOReturnSuccess||!opened)[self finishWithError:[NSString stringWithFormat:@"RFCOMM connection failed (0x%08x).",(unsigned)err]];
 }
 - (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel {
  if(self.stopping||self.channel){[channel closeChannel];return;}
  self.channel=channel;[channel setDelegate:self];[self acceptChannel];
 }
 - (void)rfcommChannelOpenComplete:(IOBluetoothRFCOMMChannel *)channel status:(IOReturn)error {
- if(channel!=self.channel)return;if(error!=kIOReturnSuccess){[self report:@"RFCOMM open failed."];[self stop];return;}[self acceptChannel];
+ if(self.stopping||!self.opening||![self sameCandidate:[channel getDevice]])return;
+ self.channel=channel;if(error!=kIOReturnSuccess){[self finishWithError:[NSString stringWithFormat:@"RFCOMM open failed (0x%08x).",(unsigned)error]];return;}[self acceptChannel];
 }
 - (void)acceptChannel {
+ if(self.stopping||self.attached)return;
+ self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
  IOBluetoothDevice *device=[self.channel getDevice];
+ [self trace:[NSString stringWithFormat:@"RFCOMM opened; paired=%@; checking authentication/encryption…",[device isPaired]?@"YES":@"NO"]];
  if(![device isPaired]||[device requestAuthentication]!=kIOReturnSuccess||[device getEncryptionMode]==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
- [self report:@"Encrypted Bluetooth connected"];
+ self.attached=YES;[self report:@"Encrypted Bluetooth connected"];
  if(self.connected)self.connected();
 }
 - (BOOL)secure {return self.ready&&[[self.channel getDevice] isPaired]&&[[self.channel getDevice] getEncryptionMode]!=0;}
@@ -78,6 +143,6 @@
 }
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
 - (void)stop {
- self.stopping=YES;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
+ self.generation++;self.stopping=YES;self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
 }
 @end

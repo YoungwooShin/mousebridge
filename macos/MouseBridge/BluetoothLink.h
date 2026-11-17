@@ -7,6 +7,8 @@
 @interface MBBluetoothLink : NSObject <IOBluetoothRFCOMMChannelDelegate>
 @property(copy) void(^message)(uint8_t,NSData *);
 @property(copy) void(^state)(NSString *);
+@property(copy) void(^diagnostic)(NSString *);
+- (instancetype)initWithDiscoveryTimeout:(NSTimeInterval)discoveryTimeout openTimeout:(NSTimeInterval)openTimeout;
 @property(copy) void(^connected)(void);
 @property(copy) void(^closed)(void);
 @property(readonly) BOOL ready;
