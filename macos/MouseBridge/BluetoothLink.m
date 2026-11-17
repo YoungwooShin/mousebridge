@@ -1,6 +1,6 @@
 #import "BluetoothLink.h"
 #import "Wire.h"
-@class MBSDPRequest;
+@class MBSDPRequest,MBIncomingRequest;
 @interface MBBluetoothLink ()
 @property IOBluetoothRFCOMMChannel *channel;
 @property IOBluetoothSDPServiceRecord *record;
@@ -16,6 +16,12 @@
 @property NSTimeInterval phaseStarted;
 @property NSTimeInterval discoveryTimeout,openTimeout;
 @property MBSDPRequest *query;
+@property MBIncomingRequest *incoming;
+@property BOOL listening,receiveReady;
+@property BluetoothRFCOMMChannelID serverChannel;
+@property NSMutableArray<NSDictionary *> *pendingIncoming;
+@property NSUInteger pendingBytes;
+- (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel generation:(NSUInteger)generation;
 - (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
 - (void)basebandComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
 @end
@@ -34,14 +40,21 @@
  dispatch_async(dispatch_get_main_queue(),^{[owner queryComplete:device status:status generation:generation];});
 }
 @end
-@interface MBBluetoothLink ()
+@interface MBIncomingRequest:NSObject
+@property(weak) MBBluetoothLink *owner;
+@property NSUInteger generation;
+@end
+@implementation MBIncomingRequest
+- (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel {
+ [self.owner opened:notification channel:channel generation:self.generation];
+}
 @end
 @implementation MBBluetoothLink
 + (IOBluetoothSDPUUID *)serviceUUID {const unsigned char bytes[]={0x9d,0x96,0xd1,0xbd,0x27,0x86,0x4b,0x5d,0x97,0xe7,0xcf,0x84,0x39,0x48,0x43,0xaf};return [IOBluetoothSDPUUID uuidWithBytes:bytes length:16];}
 + (NSArray *)pairedDevices {return [IOBluetoothDevice pairedDevices]?:@[];}
 - (instancetype)init {return [self initWithDiscoveryTimeout:20 openTimeout:15];}
 - (instancetype)initWithDiscoveryTimeout:(NSTimeInterval)discoveryTimeout openTimeout:(NSTimeInterval)openTimeout {
- if((self=[super init])){_received=[NSMutableData data];_outgoing=[NSMutableArray array];_discoveryTimeout=MAX(discoveryTimeout,.02);_openTimeout=MAX(openTimeout,.02);}return self;
+ if((self=[super init])){_received=[NSMutableData data];_outgoing=[NSMutableArray array];_pendingIncoming=[NSMutableArray array];_discoveryTimeout=MAX(discoveryTimeout,.02);_openTimeout=MAX(openTimeout,.02);}return self;
 }
 - (NSString *)peerName{return [[self.channel getDevice] nameOrAddress]?:@"Paired computer";}
 - (BOOL)ready{return self.channel!=nil&&[self.channel isOpen];}
@@ -78,13 +91,21 @@
           @"0005 - BrowseGroupList":@[[IOBluetoothSDPUUID uuid16:0x1002]],
           @"0100 - ServiceName":@"MouseBridge",@"LocalAttributes":@{@"Persistent":@NO}};
 }
+- (IOBluetoothSDPServiceRecord *)publishRecord:(NSDictionary *)dictionary {return [IOBluetoothSDPServiceRecord publishedServiceRecordWithDictionary:dictionary];}
+- (IOBluetoothUserNotification *)registerIncoming:(id)target {
+ // Receive the global notification; application-side guards below accept only our incoming channel.
+ return [IOBluetoothRFCOMMChannel registerForChannelOpenNotifications:target selector:@selector(opened:channel:)];
+}
 - (void)listen {
  [self stop];self.stopping=NO;
  NSDictionary *dict=[MBBluetoothLink serviceDictionary];
- self.record=[IOBluetoothSDPServiceRecord publishedServiceRecordWithDictionary:dict];BluetoothRFCOMMChannelID channel=0;
+ self.record=[self publishRecord:dict];BluetoothRFCOMMChannelID channel=0;
  if(!self.record||[self.record getRFCOMMChannelID:&channel]!=kIOReturnSuccess){[self report:@"Cannot advertise RFCOMM. Check Bluetooth permission and radio."];[self stop];return;}
- self.notification=[IOBluetoothRFCOMMChannel registerForChannelOpenNotifications:self selector:@selector(opened:channel:) withChannelID:channel direction:kIOBluetoothUserNotificationChannelDirectionIncoming];
+ self.serverChannel=channel;self.listening=YES;
+ MBIncomingRequest *incoming=[MBIncomingRequest new];incoming.owner=self;incoming.generation=self.generation;self.incoming=incoming;
+ self.notification=[self registerIncoming:incoming];
  if(!self.notification){[self finishWithError:@"Cannot register RFCOMM incoming notification. Copy diagnostics."];return;}
+ [self trace:[NSString stringWithFormat:@"RFCOMM notification registered: unfiltered; strict channel/direction guard; mainThread=%@",NSThread.isMainThread?@"YES":@"NO"]];
  [self trace:[NSString stringWithFormat:@"SDP service published: channel=%u, channel parameter=uint8, public browse group enabled",(unsigned)channel]];
  [self report:@"Secondary ready. Pair in system Bluetooth settings first."];
 }
@@ -153,9 +174,18 @@
  if(self.stopping)return;self.channel=opened;
  if(err!=kIOReturnSuccess||!opened)[self finishWithError:[NSString stringWithFormat:@"RFCOMM connection failed (0x%08x).",(unsigned)err]];
 }
-- (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel {
- if(self.stopping||self.channel){[channel closeChannel];return;}
- self.channel=channel;[channel setDelegate:self];[self acceptChannel];
+- (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel generation:(NSUInteger)generation {
+ // Never close a channel belonging to another app, an old registration or a different service.
+ if(self.stopping||!self.listening||generation!=self.generation)return;
+ if([channel getChannelID]!=self.serverChannel)return;
+ [self trace:[NSString stringWithFormat:@"RFCOMM open notification: matching channel=%u; incoming=%@; mainThread=%@",(unsigned)self.serverChannel,[channel isIncoming]?@"YES":@"NO",NSThread.isMainThread?@"YES":@"NO"]];
+ if(![channel isIncoming]){[self trace:@"Ignoring outgoing channel notification."];return;}
+ if(channel==self.channel){[self trace:@"Duplicate notification for active channel ignored."];return;}
+ if(self.channel){[self trace:@"Rejecting an additional incoming connection: already busy."];[channel closeChannel];return;}
+ self.channel=channel;self.receiveReady=NO;
+ IOReturn result=[channel setDelegate:self];[self trace:[NSString stringWithFormat:@"Incoming channel delegate registration returned 0x%08x",(unsigned)result]];
+ if(result!=kIOReturnSuccess){[self finishWithError:@"Could not register incoming RFCOMM delegate."];return;}
+ [self acceptChannel];
 }
 - (void)rfcommChannelOpenComplete:(IOBluetoothRFCOMMChannel *)channel status:(IOReturn)error {
  if(self.stopping||!self.opening||![self sameCandidate:[channel getDevice]])return;
@@ -167,7 +197,7 @@
  IOBluetoothDevice *device=[self.channel getDevice];
  [self trace:[NSString stringWithFormat:@"RFCOMM opened; paired=%@; checking authentication/encryption…",[device isPaired]?@"YES":@"NO"]];
  if(![device isPaired]||[device requestAuthentication]!=kIOReturnSuccess||[device getEncryptionMode]==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
- self.attached=YES;[self report:@"Encrypted Bluetooth connected"];
+ self.attached=YES;self.receiveReady=NO;[self report:@"Encrypted Bluetooth connected"];
  if(self.connected)self.connected();
 }
 - (BOOL)secure {return self.ready&&[[self.channel getDevice] isPaired]&&[[self.channel getDevice] getEncryptionMode]!=0;}
@@ -193,10 +223,20 @@
  [self.received appendBytes:bytes length:length];
  while(self.received.length>=4){const uint8_t *p=self.received.bytes;uint32_t n=mb_body_length(p);if(!mb_valid_body(n)){[self report:@"Invalid frame size."];[self stop];return;}
  if(self.received.length<n+4)return;if(!mb_known_kind(p[4])){[self report:@"Unknown protocol message."];[self stop];return;}
- uint8_t kind=p[4];NSData *payload=[self.received subdataWithRange:NSMakeRange(5,n-1)];[self.received replaceBytesInRange:NSMakeRange(0,n+4) withBytes:NULL length:0];if(self.message)self.message(kind,payload);if(!self.ready)return;}
+ uint8_t kind=p[4];NSData *payload=[self.received subdataWithRange:NSMakeRange(5,n-1)];[self.received replaceBytesInRange:NSMakeRange(0,n+4) withBytes:NULL length:0];if(!self.receiveReady){
+  if(self.pendingIncoming.count>=128||self.pendingBytes+payload.length>512*1024){[self finishWithError:@"Incoming traffic exceeded pending-approval buffer. Reconnect after reviewing the Mac approval dialog."];return;}
+  [self.pendingIncoming addObject:@{@"kind":@(kind),@"payload":payload}];self.pendingBytes+=payload.length;
+ }else if(self.message)self.message(kind,payload);
+ if(!self.ready)return;}
+}
+- (void)startReceiving {
+ if(self.stopping||!self.attached||!self.ready||self.receiveReady)return;
+ self.receiveReady=YES;NSArray *queued=self.pendingIncoming.copy;[self.pendingIncoming removeAllObjects];self.pendingBytes=0;
+ NSUInteger generation=self.generation;[self trace:[NSString stringWithFormat:@"Application input engine ready; releasing %lu buffered messages",(unsigned long)queued.count]];
+ for(NSDictionary *message in queued){if(self.stopping||generation!=self.generation||!self.ready)break;if(self.message)self.message([message[@"kind"] unsignedCharValue],message[@"payload"]);}
 }
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
 - (void)stop {
- self.generation++;self.stopping=YES;self.baseband=self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
+ self.generation++;self.stopping=YES;self.listening=self.receiveReady=NO;self.serverChannel=0;self.incoming=nil;[self.pendingIncoming removeAllObjects];self.pendingBytes=0;self.baseband=self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
 }
 @end

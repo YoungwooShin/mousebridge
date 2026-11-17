@@ -5,13 +5,22 @@
 @end
 @implementation MBFakeRecord
 - (IOReturn)getRFCOMMChannelID:(BluetoothRFCOMMChannelID *)cid{*cid=7;return kIOReturnSuccess;}
+- (IOReturn)removeServiceRecord{return kIOReturnSuccess;}
 @end
 @interface MBFakeChannel:NSObject
+@property BOOL incoming,openStatus;
+@property BluetoothRFCOMMChannelID channelID;
+@property id peer;
+@property(weak) id delegate;
+@property NSUInteger closes,delegateCalls;
 @end
 @implementation MBFakeChannel
-- (IOReturn)setDelegate:(id)delegate{return kIOReturnSuccess;}
-- (IOReturn)closeChannel{return kIOReturnSuccess;}
-- (BOOL)isOpen{return NO;}
+- (IOReturn)setDelegate:(id)delegate{self.delegate=delegate;self.delegateCalls++;return kIOReturnSuccess;}
+- (IOReturn)closeChannel{self.closes++;self.openStatus=NO;return kIOReturnSuccess;}
+- (BOOL)isOpen{return self.openStatus;}
+- (BOOL)isIncoming{return self.incoming;}
+- (BluetoothRFCOMMChannelID)getChannelID{return self.channelID;}
+- (IOBluetoothDevice *)getDevice{return self.peer;}
 @end
 @interface MBFakeDevice:NSObject
 @property NSString *addressString;
@@ -24,6 +33,8 @@
 @end
 @implementation MBFakeDevice
 - (BOOL)isPaired{return YES;}
+- (IOReturn)requestAuthentication{return kIOReturnSuccess;}
+- (BluetoothHCIEncryptionMode)getEncryptionMode{return 1;}
 - (BOOL)isConnected{return self.connected;}
 - (IOReturn)openConnection:(id)target withPageTimeout:(BluetoothHCIPageTimeout)timeout authenticationRequired:(BOOL)auth {
  assert(auth==YES);self.basebandOpens++;self.connectionTarget=target;if(self.connectDuringOpen)self.connected=YES;return self.openError;
@@ -36,13 +47,24 @@
 @interface NSObject(MBTestCallback)
 - (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 - (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
+- (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel;
 @end
 @interface MBBluetoothLink(SDPTest)
 + (NSDictionary *)serviceDictionary;
 @end
+@interface MBFakeNotification:NSObject
+@property BOOL unregistered;
+@end
+@implementation MBFakeNotification
+- (void)unregister{self.unregistered=YES;}
+@end
 @interface MBTestLink:MBBluetoothLink
+@property id incomingTarget;
+@property MBFakeNotification *testNotification;
 @end
 @implementation MBTestLink
+- (IOBluetoothSDPServiceRecord *)publishRecord:(NSDictionary *)dictionary{return (id)[MBFakeRecord new];}
+- (IOBluetoothUserNotification *)registerIncoming:(id)target{self.incomingTarget=target;self.testNotification=[MBFakeNotification new];return (id)self.testNotification;}
 - (void)traceControllerState {} // No live controller/permission access in mocked-device tests.
 @end
 static MBFakeDevice *device(void){MBFakeDevice *d=[MBFakeDevice new];d.connected=YES;d.addressString=@"00-11-22-33-44-AA";return d;}
@@ -83,6 +105,33 @@ int main(void){@autoreleasepool{
  spin(.35);assert([state containsString:@"baseband connection timed out"]);assert(!d.target);
  // Polling also recovers when only the connected flag changes and the ACL callback is missing.
  d=device();d.connected=NO;[link connect:(id)d];d.connected=YES;spin(.26);assert(d.target);[link stop];
+ // Incoming notifications: never take over or close another service/outgoing/stale channel.
+ MBTestLink *server=[[MBTestLink alloc]initWithDiscoveryTimeout:.04 openTimeout:.04];
+ __block int connects=0;NSMutableArray<NSData *> *messages=[NSMutableArray array];__block NSString *serverState=@"";
+ server.connected=^{connects++;};server.message=^(uint8_t kind,NSData *p){assert(kind==1);[messages addObject:p];};server.state=^(NSString *v){serverState=v;};
+ [server listen];id firstObserver=server.incomingTarget;MBFakeNotification *firstNotification=server.testNotification;
+ MBFakeChannel *unrelated=[MBFakeChannel new];unrelated.channelID=8;unrelated.incoming=YES;
+ [firstObserver opened:(id)firstNotification channel:(id)unrelated];assert(unrelated.closes==0&&unrelated.delegateCalls==0);
+ MBFakeChannel *outgoing=[MBFakeChannel new];outgoing.channelID=7;outgoing.incoming=NO;
+ [firstObserver opened:(id)firstNotification channel:(id)outgoing];assert(outgoing.closes==0&&outgoing.delegateCalls==0);
+ MBFakeChannel *accepted=[MBFakeChannel new];accepted.channelID=7;accepted.incoming=YES;accepted.openStatus=YES;accepted.peer=device();
+ [firstObserver opened:(id)firstNotification channel:(id)accepted];assert(connects==1);assert(accepted.closes==0&&accepted.delegateCalls==1);
+ // Windows may send protocol frames while the Mac is still waiting for user approval.
+ uint8_t frameA[]={0,0,0,2,1,'a'},frameB[]={0,0,0,2,1,'b'};
+ [server rfcommChannelData:(id)accepted data:frameA length:sizeof(frameA)];[server rfcommChannelData:(id)accepted data:frameB length:sizeof(frameB)];assert(messages.count==0);
+ [server startReceiving];assert(messages.count==2);assert(((const uint8_t *)messages[0].bytes)[0]=='a');assert(((const uint8_t *)messages[1].bytes)[0]=='b');
+ [server startReceiving];assert(messages.count==2);
+ [firstObserver opened:(id)firstNotification channel:(id)accepted];assert(connects==1&&accepted.closes==0&&accepted.delegateCalls==1);
+ MBFakeChannel *extra=[MBFakeChannel new];extra.channelID=7;extra.incoming=YES;extra.openStatus=YES;
+ [firstObserver opened:(id)firstNotification channel:(id)extra];assert(extra.closes==1&&accepted.closes==0);
+ [server stop];assert(firstNotification.unregistered);[server listen];
+ MBFakeChannel *stale=[MBFakeChannel new];stale.channelID=7;stale.incoming=YES;
+ [firstObserver opened:(id)firstNotification channel:(id)stale];assert(stale.closes==0&&stale.delegateCalls==0);
+ MBFakeChannel *pending=[MBFakeChannel new];pending.channelID=7;pending.incoming=YES;pending.openStatus=YES;pending.peer=device();
+ [server.incomingTarget opened:(id)server.testNotification channel:(id)pending];
+ for(int i=0;i<129;i++)[server rfcommChannelData:(id)pending data:frameA length:sizeof(frameA)];
+ assert([serverState containsString:@"pending-approval buffer"]);assert(pending.closes==1);assert(messages.count==2);[server stop];
+ puts("PASS: incoming channel/direction/generation guards, duplicate safety, busy rejection, approval-buffer ordering/once-only delivery and bounded overflow (no radio)");
  puts("PASS: authenticated baseband before SDP, ACL timeout/error, connection-exists, stale ACL callback, success-with-disconnected rejection and connected-flag polling (no radio)");
  puts("PASS: SDP callback timeout, address-wrapper identity, stale generation, channel-open timeout and immediate error recovery (no radio)");
 }return 0;}

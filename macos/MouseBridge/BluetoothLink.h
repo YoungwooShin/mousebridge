@@ -18,5 +18,6 @@
 - (void)connect:(IOBluetoothDevice *)device;
 - (BOOL)send:(uint8_t)kind payload:(NSData *)payload;
 - (BOOL)secure;
+- (void)startReceiving;
 - (void)stop;
 @end

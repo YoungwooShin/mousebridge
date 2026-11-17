@@ -16,9 +16,9 @@
 - (NSTextField *)label:(NSString *)text size:(CGFloat)size {NSTextField *v=[NSTextField labelWithString:text];v.font=[NSFont systemFontOfSize:size weight:size>18?NSFontWeightSemibold:NSFontWeightRegular];v.lineBreakMode=NSLineBreakByWordWrapping;v.maximumNumberOfLines=0;v.preferredMaxLayoutWidth=600;return v;}
 - (NSButton *)button:(NSString *)title action:(SEL)action {NSButton *b=[NSButton buttonWithTitle:title target:self action:action];b.bezelStyle=NSBezelStyleRounded;return b;}
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
- self.diagnostics=[NSMutableString stringWithFormat:@"MouseBridge macOS 0.3.3 · %@\n",NSProcessInfo.processInfo.operatingSystemVersionString];
+ self.diagnostics=[NSMutableString stringWithFormat:@"MouseBridge macOS 0.3.4 · %@\n",NSProcessInfo.processInfo.operatingSystemVersionString];
  [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];NSMenu *menu=[NSMenu new];NSMenuItem *app=[NSMenuItem new];[menu addItem:app];NSMenu *sub=[NSMenu new];[sub addItemWithTitle:@"Quit MouseBridge" action:@selector(terminate:) keyEquivalent:@"q"];app.submenu=sub;NSApp.mainMenu=menu;
- self.window=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,680,760) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];self.window.title=@"MouseBridge 0.3.3 · macOS experimental";self.window.delegate=self;self.window.minSize=NSMakeSize(680,600);[self.window center];
+ self.window=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,680,760) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];self.window.title=@"MouseBridge 0.3.4 · macOS experimental";self.window.delegate=self;self.window.minSize=NSMakeSize(680,600);[self.window center];
  NSScrollView *scroll=[[NSScrollView alloc]initWithFrame:self.window.contentView.bounds];scroll.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;scroll.hasVerticalScroller=YES;scroll.drawsBackground=NO;[self.window.contentView addSubview:scroll];
  NSView *document=[NSView new];document.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=document;
  NSStackView *stack=[NSStackView new];stack.orientation=NSUserInterfaceLayoutOrientationVertical;stack.alignment=NSLayoutAttributeLeading;stack.spacing=16;stack.translatesAutoresizingMaskIntoConstraints=NO;[document addSubview:stack];
@@ -45,7 +45,7 @@
  self.link.connected=^{MBApp *s=weak;if(!s)return;
   if(s.secondary){NSAlert *alert=[NSAlert new];alert.messageText=@"Allow this paired computer to control your Mac?";alert.informativeText=[NSString stringWithFormat:@"%@ can send keyboard/mouse input and text clipboard. Only accept your own trusted main computer. Stop ends sharing.",s.link.peerName];[alert addButtonWithTitle:@"Allow this connection"];[alert addButtonWithTitle:@"Reject"];if([alert runModal]!=NSAlertFirstButtonReturn){[s.link stop];return;}}
   s.engine=[[MBInputEngine alloc]initWithLink:s.link secondary:s.secondary];s.engine.state=^(NSString *text){weak.inputState.stringValue=text;};s.engine.secondaryLeft=s.side.indexOfSelectedItem==0;s.engine.edgeEnabled=s.edge.state==NSControlStateValueOn;
-  if(![s.engine start]){NSString *reason=s.inputState.stringValue;[s.engine stop];s.engine=nil;[s.link stop];s.inputState.stringValue=reason;}
+  if(![s.engine start]){NSString *reason=s.inputState.stringValue;[s.engine stop];s.engine=nil;[s.link stop];s.inputState.stringValue=reason;}else{[s.link startReceiving];}
  };
  self.link.message=^(uint8_t kind,NSData *payload){[weak.engine handle:kind payload:payload];};
 }
