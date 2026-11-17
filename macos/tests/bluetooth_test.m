@@ -1,6 +1,10 @@
 #import <Foundation/Foundation.h>
 #import "../MouseBridge/BluetoothLink.h"
 #include <assert.h>
+@interface MBBluetoothLink(SDPTest)
++ (NSDictionary *)serviceDictionary;
++ (IOBluetoothSDPUUID *)serviceUUID;
+@end
 @interface MBFakeRecord:NSObject
 @end
 @implementation MBFakeRecord
@@ -40,17 +44,14 @@
  assert(auth==YES);self.basebandOpens++;self.connectionTarget=target;if(self.connectDuringOpen)self.connected=YES;return self.openError;
 }
 - (NSArray *)services{return self.record?@[self.record]:@[];}
-- (IOReturn)performSDPQuery:(id)target{self.target=target;return self.queryError;}
+- (IOReturn)performSDPQuery:(id)target{assert(!"full browse query must not be used");return kIOReturnError;}
+- (IOReturn)performSDPQuery:(id)target uuids:(NSArray *)uuids{assert(uuids.count==1);assert([uuids[0] isEqual:[MBBluetoothLink serviceUUID]]);self.target=target;return self.queryError;}
 - (id)getServiceRecordForUUID:(IOBluetoothSDPUUID *)uuid{return self.record;}
 - (IOReturn)openRFCOMMChannelAsync:(IOBluetoothRFCOMMChannel **)out withChannelID:(BluetoothRFCOMMChannelID)cid delegate:(id)delegate{assert(cid==7);self.opens++;*out=(id)[MBFakeChannel new];return kIOReturnSuccess;}
 @end
 @interface NSObject(MBTestCallback)
 - (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
-- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 - (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel;
-@end
-@interface MBBluetoothLink(SDPTest)
-+ (NSDictionary *)serviceDictionary;
 @end
 @interface MBFakeNotification:NSObject
 @property BOOL unregistered;
@@ -88,23 +89,11 @@ int main(void){@autoreleasepool{
  // A matching discovered service opens once and the open phase has its own deadline.
  [link connect:(id)d];wrapper.record=[MBFakeRecord new];[d.target sdpQueryComplete:(id)wrapper status:0];spin(.02);assert(wrapper.opens==1);assert([state containsString:@"RFCOMM channel 7"]);spin(.35);assert([state containsString:@"connection timed out"]);
  d.queryError=kIOReturnError;[link connect:(id)d];assert([state containsString:@"could not start"]);[link stop];
- // Establish an authenticated ACL before SDP when the device is not connected.
- d=device();d.connected=NO;[link connect:(id)d];assert(d.basebandOpens==1);assert(!d.target);assert([state containsString:@"Opening authenticated"]);
- d.connected=YES;[d.connectionTarget connectionComplete:(id)d status:0];spin(.02);assert(d.target);assert([state containsString:@"Discovering"]);[link stop];
- // An ACL timeout is distinct from a missing SDP callback; SDP must never have started.
- d=device();d.connected=NO;[link connect:(id)d];spin(.35);assert([state containsString:@"baseband connection timed out"]);assert(!d.target);
- // Immediate ACL errors preserve their phase and native error code.
- d=device();d.connected=NO;d.openError=kIOReturnError;[link connect:(id)d];assert([state containsString:@"baseband connection could not start"]);assert(!d.target);
- // The OS may return connection-exists while the connected flag has become true.
- d=device();d.connected=NO;d.connectDuringOpen=YES;d.openError=kIOReturnError;[link connect:(id)d];assert([state containsString:@"Discovering"]);assert(d.target);[link stop];
- // A stale ACL callback must not advance a newer attempt.
- d=device();d.connected=NO;[link connect:(id)d];old=d.connectionTarget;[link connect:(id)d];[old connectionComplete:(id)d status:0];spin(.02);assert([state containsString:@"Opening authenticated"]);assert(!d.target);[link stop];
- // A success callback with connected=NO must not be mistaken for an established transport.
- d=device();d.connected=NO;[link connect:(id)d];[d.connectionTarget connectionComplete:(id)d status:0];spin(.02);
- assert([state containsString:@"Waiting for Bluetooth connection confirmation"]);assert(!d.target);
- spin(.35);assert([state containsString:@"baseband connection timed out"]);assert(!d.target);
- // Polling also recovers when only the connected flag changes and the ACL callback is missing.
- d=device();d.connected=NO;[link connect:(id)d];d.connected=YES;spin(.26);assert(d.target);[link stop];
+ // A disconnected paired device goes straight to the UUID SDP query, which pages it; no baseband gate.
+ d=device();d.connected=NO;[link connect:(id)d];assert(d.basebandOpens==0);assert(d.target);assert([state containsString:@"Discovering"]);
+ wrapper=device();wrapper.connected=NO;wrapper.record=[MBFakeRecord new];[d.target sdpQueryComplete:(id)wrapper status:0];spin(.02);assert(wrapper.opens==1);[link stop];
+ // With isConnected still NO, the SDP deadline (not a baseband deadline) applies.
+ d=device();d.connected=NO;[link connect:(id)d];spin(.35);assert([state containsString:@"discovery timed out"]);assert(d.basebandOpens==0);
  // Incoming notifications: never take over or close another service/outgoing/stale channel.
  MBTestLink *server=[[MBTestLink alloc]initWithDiscoveryTimeout:.04 openTimeout:.04];
  __block int connects=0;NSMutableArray<NSData *> *messages=[NSMutableArray array];__block NSString *serverState=@"";
@@ -143,6 +132,6 @@ int main(void){@autoreleasepool{
  spin(.35);assert(threadConnects==1&&threadMessages==1);[threaded stop];threaded.connected=nil;
  puts("PASS: background incoming/data callbacks normalized to main before application/UI use (no radio)");
  puts("PASS: incoming channel/direction/generation guards, duplicate safety, busy rejection, approval-buffer ordering/once-only delivery and bounded overflow (no radio)");
- puts("PASS: authenticated baseband before SDP, ACL timeout/error, connection-exists, stale ACL callback, success-with-disconnected rejection and connected-flag polling (no radio)");
+ puts("PASS: disconnected paired device goes directly to UUID SDP without a baseband gate (no radio)");
  puts("PASS: SDP callback timeout, address-wrapper identity, stale generation, channel-open timeout and immediate error recovery (no radio)");
 }return 0;}

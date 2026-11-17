@@ -10,7 +10,7 @@
 @property NSMutableArray<NSData *> *outgoing;
 @property NSData *inflight;
 @property NSUInteger offset,writeLength;
-@property BOOL writing,stopping,baseband,searching,opening,attached;
+@property BOOL writing,stopping,searching,opening,attached;
 @property NSUInteger generation;
 @property NSTimer *connectionTimer;
 @property NSTimeInterval phaseStarted;
@@ -23,7 +23,6 @@
 @property NSUInteger pendingBytes;
 - (void)opened:(IOBluetoothUserNotification *)notification channel:(IOBluetoothRFCOMMChannel *)channel generation:(NSUInteger)generation;
 - (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
-- (void)basebandComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation;
 @end
 // Each asynchronous SDP request carries its own generation. Old callbacks cannot advance a reconnect.
 @interface MBSDPRequest:NSObject
@@ -31,10 +30,6 @@
 @property NSUInteger generation;
 @end
 @implementation MBSDPRequest
-- (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
- MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
- dispatch_async(dispatch_get_main_queue(),^{[owner basebandComplete:device status:status generation:generation];});
-}
 - (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
  MBBluetoothLink *owner=self.owner;NSUInteger generation=self.generation;
  dispatch_async(dispatch_get_main_queue(),^{[owner queryComplete:device status:status generation:generation];});
@@ -74,11 +69,6 @@
 }
 - (void)checkConnection {
  if(self.stopping)return;NSTimeInterval elapsed=NSProcessInfo.processInfo.systemUptime-self.phaseStarted;
- if(self.baseband){
-  if(self.candidate.isConnected){[self trace:@"Baseband isConnected=YES (poll); proceeding to SDP."];[self beginDiscovery];return;}
-  if(elapsed>=self.openTimeout)[self finishWithError:@"Bluetooth baseband connection timed out BEFORE service discovery. Keep Windows awake with Bluetooth on, then reconnect. Copy diagnostics."];
-  return;
- }
  if(self.searching){
   if(elapsed>=self.discoveryTimeout){[self trace:[NSString stringWithFormat:@"SDP deadline: basebandConnected=%@, cachedServices=%lu",self.candidate.isConnected?@"YES":@"NO",(unsigned long)self.candidate.services.count]];[self finishWithError:@"Service discovery timed out. Check Windows Secondary is running, then reconnect. Copy diagnostics for details."];return;}
   if(elapsed>=2){IOBluetoothSDPServiceRecord *record=[self.candidate getServiceRecordForUUID:[MBBluetoothLink serviceUUID]];if(record){[self trace:@"SDP callback pending, matching cached service found; trying its RFCOMM channel."];[self openService:record device:self.candidate];}}
@@ -122,39 +112,18 @@
  MBSDPRequest *query=[MBSDPRequest new];query.owner=self;query.generation=self.generation;self.query=query;
  [self traceControllerState];
  [self trace:[NSString stringWithFormat:@"Connection attempt %lu; paired=YES; basebandConnected=%@; cachedServices=%lu",(unsigned long)self.generation,device.isConnected?@"YES":@"NO",(unsigned long)device.services.count]];
- if(device.isConnected){[self beginDiscovery];return;}
- self.baseband=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
- [self report:@"Opening authenticated Bluetooth baseband connection…"];[self watchConnection];
- IOReturn err=[device openConnection:query withPageTimeout:0x4000 authenticationRequired:YES];
- [self trace:[NSString stringWithFormat:@"openConnection(authRequired=YES) returned 0x%08x",(unsigned)err]];
- // Connection-exists return codes differ between OS versions; trust the reported connected state.
- if(err!=kIOReturnSuccess){
-  if(device.isConnected)[self beginDiscovery];
-  else [self finishWithError:[NSString stringWithFormat:@"Bluetooth baseband connection could not start (0x%08x), BEFORE service discovery. Copy diagnostics.",(unsigned)err]];
- }
-}
-- (void)basebandComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation {
- if(self.stopping||generation!=self.generation||!self.baseband)return;
- if(![self sameCandidate:device]){[self trace:@"Ignored baseband callback from a different device address."];return;}
- [self trace:[NSString stringWithFormat:@"Baseband callback: status=0x%08x; connected=%@",(unsigned)status,device.isConnected?@"YES":@"NO"]];
- if(status!=kIOReturnSuccess&&!device.isConnected){[self finishWithError:[NSString stringWithFormat:@"Bluetooth baseband connection failed (0x%08x), BEFORE service discovery. Copy diagnostics.",(unsigned)status]];return;}
- if(!device.isConnected){
-  [self report:@"Waiting for Bluetooth connection confirmation…"];
-  [self trace:@"Baseband callback succeeded but isConnected=NO; retaining baseband deadline, SDP has NOT started."];
-  return;
- }
- self.candidate=device; // Prefer the connected callback wrapper for the verified same address.
+ // No separate baseband step: the SDP query pages the device itself. Waiting for isConnected after
+ // openConnection stalled on macOS 26 (success callback while isConnected stayed NO).
  [self beginDiscovery];
 }
 - (void)beginDiscovery {
  if(self.stopping||self.searching||self.opening||self.attached)return;
- if(!self.candidate.isConnected){[self trace:@"SDP deferred: baseband connection is not confirmed."];return;}
- self.baseband=NO;self.searching=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
+ self.searching=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
  [self report:@"Discovering MouseBridge service…"];
- [self trace:[NSString stringWithFormat:@"SDP attempt %lu started AFTER baseband stage; full service query; limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];
+ [self trace:[NSString stringWithFormat:@"SDP attempt %lu started; MouseBridge UUID query (pages device if needed); limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];
  [self watchConnection];
- IOReturn err=[self.candidate performSDPQuery:self.query];
- [self trace:[NSString stringWithFormat:@"performSDPQuery returned 0x%08x",(unsigned)err]];
+ IOReturn err=[self.candidate performSDPQuery:self.query uuids:@[[MBBluetoothLink serviceUUID]]];
+ [self trace:[NSString stringWithFormat:@"performSDPQuery(uuids) returned 0x%08x",(unsigned)err]];
  if(err!=kIOReturnSuccess)[self finishWithError:[NSString stringWithFormat:@"Service discovery could not start (0x%08x). Copy diagnostics.",(unsigned)err]];
 }
 - (void)queryComplete:(IOBluetoothDevice *)device status:(IOReturn)status generation:(NSUInteger)generation {
@@ -197,13 +166,16 @@
 }
 - (void)acceptChannel {
  if(self.stopping||self.attached)return;
- self.baseband=NO;self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
+ self.opening=NO;self.searching=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;
  IOBluetoothDevice *device=[self.channel getDevice];
  [self trace:[NSString stringWithFormat:@"RFCOMM opened; paired=%@; checking authentication/encryption…",[device isPaired]?@"YES":@"NO"]];
- BOOL paired=[device isPaired];IOReturn authentication=paired?[device requestAuthentication]:kIOReturnNotPermitted;
- BluetoothHCIEncryptionMode encryption=[device getEncryptionMode];
+ BOOL paired=[device isPaired];BluetoothHCIEncryptionMode encryption=[device getEncryptionMode];
+ // BR/EDR encryption is enabled only after link-key authentication. Request authentication only while the
+ // link is unencrypted, then still require encryption; an encrypted link is not re-authenticated synchronously.
+ IOReturn authentication=kIOReturnSuccess;
+ if(paired&&encryption==0){authentication=[device requestAuthentication];encryption=[device getEncryptionMode];}
  [self trace:[NSString stringWithFormat:@"RFCOMM security: paired=%@; authentication=0x%08x; encryptionMode=%u",paired?@"YES":@"NO",(unsigned)authentication,(unsigned)encryption]];
- if(!paired||authentication!=kIOReturnSuccess||encryption==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
+ if(!paired||encryption==0){[self report:@"Connection rejected: paired, authenticated and encrypted Bluetooth is required."];[self stop];return;}
  self.attached=YES;self.receiveReady=NO;[self report:@"Encrypted Bluetooth connected"];
  if(self.connected)self.connected();
 }
@@ -251,6 +223,6 @@
 - (void)rfcommChannelClosed:(IOBluetoothRFCOMMChannel *)channel {
  if(!NSThread.isMainThread){dispatch_async(dispatch_get_main_queue(),^{[self rfcommChannelClosed:channel];});return;}if(channel==self.channel){[self report:@"Peer disconnected"];[self stop];}}
 - (void)stop {
- self.generation++;self.stopping=YES;self.listening=self.receiveReady=NO;self.serverChannel=0;self.incoming=nil;[self.pendingIncoming removeAllObjects];self.pendingBytes=0;self.baseband=self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
+ self.generation++;self.stopping=YES;self.listening=self.receiveReady=NO;self.serverChannel=0;self.incoming=nil;[self.pendingIncoming removeAllObjects];self.pendingBytes=0;self.searching=self.opening=self.attached=NO;[self.connectionTimer invalidate];self.connectionTimer=nil;self.query=nil;IOBluetoothRFCOMMChannel *old=self.channel;self.channel=nil;[old setDelegate:nil];[old closeChannel];[self.notification unregister];self.notification=nil;[self.record removeServiceRecord];self.record=nil;self.candidate=nil;[self.received setLength:0];[self.outgoing removeAllObjects];self.inflight=nil;self.offset=0;self.writing=NO;if(self.closed)self.closed();
 }
 @end
