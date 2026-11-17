@@ -11,11 +11,11 @@
 @property BOOL incoming,openStatus;
 @property BluetoothRFCOMMChannelID channelID;
 @property id peer;
-@property(weak) id delegate;
+@property(weak) id registeredDelegate;
 @property NSUInteger closes,delegateCalls;
 @end
 @implementation MBFakeChannel
-- (IOReturn)setDelegate:(id)delegate{self.delegate=delegate;self.delegateCalls++;return kIOReturnSuccess;}
+- (IOReturn)setDelegate:(id)delegate{self.registeredDelegate=delegate;self.delegateCalls++;return kIOReturnSuccess;}
 - (IOReturn)closeChannel{self.closes++;self.openStatus=NO;return kIOReturnSuccess;}
 - (BOOL)isOpen{return self.openStatus;}
 - (BOOL)isIncoming{return self.incoming;}
@@ -133,7 +133,8 @@ int main(void){@autoreleasepool{
  assert([serverState containsString:@"pending-approval buffer"]);assert(pending.closes==1);assert(messages.count==2);[server stop];
  // Driver callbacks on a background thread must reach AppKit/application callbacks on main.
  MBTestLink *threaded=[[MBTestLink alloc]initWithDiscoveryTimeout:.04 openTimeout:.04];__block int threadConnects=0,threadMessages=0;
- threaded.connected=^{assert(NSThread.isMainThread);threadConnects++;[threaded startReceiving];};
+ __weak MBTestLink *weakThreaded=threaded;
+ threaded.connected=^{assert(NSThread.isMainThread);threadConnects++;[weakThreaded startReceiving];};
  threaded.message=^(uint8_t kind,NSData *payload){assert(NSThread.isMainThread);assert(kind==1);threadMessages++;};
  [threaded listen];id observer=threaded.incomingTarget;id note=threaded.testNotification;
  MBFakeChannel *threadChannel=[MBFakeChannel new];threadChannel.channelID=7;threadChannel.incoming=YES;threadChannel.openStatus=YES;threadChannel.peer=device();
