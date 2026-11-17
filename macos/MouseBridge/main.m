@@ -43,7 +43,12 @@
  self.link.state=^(NSString *text){weak.status.stringValue=text;};
  self.link.closed=^{[weak.engine stop];weak.engine=nil;weak.inputState.stringValue=@"Disconnected · local input restored";};
  self.link.connected=^{MBApp *s=weak;if(!s)return;
-  if(s.secondary){NSAlert *alert=[NSAlert new];alert.messageText=@"Allow this paired computer to control your Mac?";alert.informativeText=[NSString stringWithFormat:@"%@ can send keyboard/mouse input and text clipboard. Only accept your own trusted main computer. Stop ends sharing.",s.link.peerName];[alert addButtonWithTitle:@"Allow this connection"];[alert addButtonWithTitle:@"Reject"];if([alert runModal]!=NSAlertFirstButtonReturn){[s.link stop];return;}}
+  if(s.secondary){
+  if(s.link.diagnostic)s.link.diagnostic(@"Presenting incoming control approval dialog on main thread.");
+  [NSApp activateIgnoringOtherApps:YES];[s.window makeKeyAndOrderFront:nil];
+  NSAlert *alert=[NSAlert new];alert.messageText=@"Allow this paired computer to control your Mac?";alert.informativeText=[NSString stringWithFormat:@"%@ can send keyboard/mouse input and text clipboard. Only accept your own trusted main computer. Stop ends sharing.",s.link.peerName];[alert addButtonWithTitle:@"Allow this connection"];[alert addButtonWithTitle:@"Reject"];NSModalResponse response=[alert runModal];
+  if(s.link.diagnostic)s.link.diagnostic(response==NSAlertFirstButtonReturn?@"Incoming control approved by user.":@"Incoming control rejected by user.");
+  if(response!=NSAlertFirstButtonReturn){[s.link stop];return;}}
   s.engine=[[MBInputEngine alloc]initWithLink:s.link secondary:s.secondary];s.engine.state=^(NSString *text){weak.inputState.stringValue=text;};s.engine.secondaryLeft=s.side.indexOfSelectedItem==0;s.engine.edgeEnabled=s.edge.state==NSControlStateValueOn;
   if(![s.engine start]){NSString *reason=s.inputState.stringValue;[s.engine stop];s.engine=nil;[s.link stop];s.inputState.stringValue=reason;}else{[s.link startReceiving];}
  };
