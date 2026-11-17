@@ -104,10 +104,17 @@
  if(![self sameCandidate:device]){[self trace:@"Ignored baseband callback from a different device address."];return;}
  [self trace:[NSString stringWithFormat:@"Baseband callback: status=0x%08x; connected=%@",(unsigned)status,device.isConnected?@"YES":@"NO"]];
  if(status!=kIOReturnSuccess&&!device.isConnected){[self finishWithError:[NSString stringWithFormat:@"Bluetooth baseband connection failed (0x%08x), BEFORE service discovery. Copy diagnostics.",(unsigned)status]];return;}
+ if(!device.isConnected){
+  [self report:@"Waiting for Bluetooth connection confirmation…"];
+  [self trace:@"Baseband callback succeeded but isConnected=NO; retaining baseband deadline, SDP has NOT started."];
+  return;
+ }
+ self.candidate=device; // Prefer the connected callback wrapper for the verified same address.
  [self beginDiscovery];
 }
 - (void)beginDiscovery {
  if(self.stopping||self.searching||self.opening||self.attached)return;
+ if(!self.candidate.isConnected){[self trace:@"SDP deferred: baseband connection is not confirmed."];return;}
  self.baseband=NO;self.searching=YES;self.phaseStarted=NSProcessInfo.processInfo.systemUptime;
  [self report:@"Discovering MouseBridge service…"];
  [self trace:[NSString stringWithFormat:@"SDP attempt %lu started AFTER baseband stage; full service query; limit=%.1fs",(unsigned long)self.generation,self.discoveryTimeout]];

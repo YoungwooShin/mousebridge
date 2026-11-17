@@ -65,8 +65,12 @@ int main(void){@autoreleasepool{
  d=device();d.connected=NO;d.connectDuringOpen=YES;d.openError=kIOReturnError;[link connect:(id)d];assert([state containsString:@"Discovering"]);assert(d.target);[link stop];
  // A stale ACL callback must not advance a newer attempt.
  d=device();d.connected=NO;[link connect:(id)d];old=d.connectionTarget;[link connect:(id)d];[old connectionComplete:(id)d status:0];spin(.02);assert([state containsString:@"Opening authenticated"]);assert(!d.target);[link stop];
+ // A success callback with connected=NO must not be mistaken for an established transport.
+ d=device();d.connected=NO;[link connect:(id)d];[d.connectionTarget connectionComplete:(id)d status:0];spin(.02);
+ assert([state containsString:@"Waiting for Bluetooth connection confirmation"]);assert(!d.target);
+ spin(.35);assert([state containsString:@"baseband connection timed out"]);assert(!d.target);
  // Polling also recovers when only the connected flag changes and the ACL callback is missing.
  d=device();d.connected=NO;[link connect:(id)d];d.connected=YES;spin(.26);assert(d.target);[link stop];
- puts("PASS: authenticated baseband before SDP, ACL timeout/error, connection-exists, stale ACL callback and connected-flag polling (no radio)");
+ puts("PASS: authenticated baseband before SDP, ACL timeout/error, connection-exists, stale ACL callback, success-with-disconnected rejection and connected-flag polling (no radio)");
  puts("PASS: SDP callback timeout, address-wrapper identity, stale generation, channel-open timeout and immediate error recovery (no radio)");
 }return 0;}
