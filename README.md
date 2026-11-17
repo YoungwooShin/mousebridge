@@ -6,7 +6,7 @@
 
 ## Platforms and downloads
 
-Get **Windows v0.3.0 / Mac v0.3.3** downloads on the [website](https://youngwooshin.github.io/mousebridge/#downloads). Windows ZIP contains only `MouseBridge.exe`; Mac ZIP contains `MouseBridge.app` (Apple silicon + Intel). Source and SHA-256 checksums are provided alongside them.
+Get **Windows v0.3.0 / Mac v0.3.4** downloads on the [website](https://youngwooshin.github.io/mousebridge/#downloads). Windows ZIP contains only `MouseBridge.exe`; Mac ZIP contains `MouseBridge.app` (Apple silicon + Intel). Source and SHA-256 checksums are provided alongside them.
 
 | Pairing | Implementation | Verification |
 | --- | --- | --- |
@@ -77,3 +77,5 @@ Mac0.3.1 adds bounded full-SDP discovery, device-address matching, stale callbac
 Mac0.3.2 explicitly establishes an authenticated baseband connection before SDP when needed and separates baseband/SDP/RFCOMM diagnostics. Native mocked-device tests and universal build/signature verification passed; live Mac–Windows resolution is still unverified. Windows0.3.0 remains compatible.
 
 Mac0.3.3 corrects the RFCOMM SDP channel parameter to uint8 and waits for confirmed baseband state. macOS26.6.2–Windows service-search failures have been reported; working interoperability remains unconfirmed. For the reverse-direction test, use Windows **Find another secondary PC** to clear any saved target.
+
+Mac0.3.4 changes incoming registration to the global notification API with strict channel/direction/generation guards, normalizes driver callbacks to main, and buffers bounded messages until approval and input-engine readiness. Foreground approval and current Bluetooth authorization/security diagnostics are included. Native incoming-path tests/build/signing passed; physical operation remains unconfirmed. Windows0.3.0 is unchanged.

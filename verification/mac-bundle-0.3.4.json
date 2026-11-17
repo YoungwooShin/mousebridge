@@ -1,0 +1,13 @@
+{
+  "build": "native macOS CI",
+  "run_id": 44103787737,
+  "source_commit": "b52dacb505bb0f200c46a90bd62748ce1d72b1ea",
+  "sha256": "c8e77bbf56289dfd7866d33fca10a4b06fc99544c556fd86491bcc2dd32e5b21",
+  "nativeCodesignVerify": true,
+  "wireAndSDPTestsPassed": true,
+  "incomingNotificationGuardTestsPassed": true,
+  "approvalBufferTestsPassed": true,
+  "mainThreadDispatchTestPassed": true,
+  "bluetoothHardwareSuccessConfirmed": false,
+  "approvalGUIHardwareTested": false
+}

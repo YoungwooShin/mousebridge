@@ -1,5 +1,14 @@
 # MouseBridge verification
 
+## Mac0.3.4 incoming/approval handoff — 2026-11-17
+
+[Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44103787737), source `b52dacb505bb0f200c46a90bd62748ce1d72b1ea`: native wire/SDP tests and existing connection mocks passed; new incoming mocks cover unrelated/outgoing/stale notification isolation, duplicate safety, occupied-service rejection, ordered pre-approval buffering with once-only delivery and overflow limits, plus background-thread incoming/data dispatch to main. Native universal build and Apple ad-hoc signature verification passed. Windows build and111 tests passed.
+
+ZIP SHA256 `c8e77bbf56289dfd7866d33fca10a4b06fc99544c556fd86491bcc2dd32e5b21`. Bluetooth authorization/controller logging is overridden in mocks to avoid radio/permission access. Global notifications are guarded by our service channel ID, incoming direction and listener generation; unrelated channels are not closed or assigned delegates. Paired/authenticated/encrypted checks and explicit application readiness remain required. Approval UI is brought forward, but GUI presentation and actual driver notification delivery were NOT tested on physical Macs.
+
+User evidence before this change: Windows found the Mac service and reported an authenticated/encrypted socket, while Mac0.3.3 diagnostics only showed advertising and no approval dialog appeared. The root cause of missing/ignored driver notification remains unconfirmed. The registration compatibility change and handoff buffering need real-device retesting. An earlier new test-double setter recursion was caught by CI and corrected before this package was produced; no failed test artifact is distributed.
+
+
 ## Mac0.3.3 advertisement/connection-state correction — 2026-11-17
 
 [Native CI](https://github.com/YoungwooShin/mousebridge/actions/runs/44097594111), source `95bff13e7c4fa1811f9a5b0343ac145a76028c80` (merged via PR1, identical Mac/workflow source): actual Apple SDP parsing reproduces old NSNumber channel width4 and verifies corrected uint8 width1. Twelve mocked-device scenarios and wire tests passed, including a success callback with disconnected state that must not start SDP. Native universal build/Apple ad-hoc signature verification and Windows111 tests passed.

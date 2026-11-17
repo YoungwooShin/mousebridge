@@ -76,3 +76,15 @@ The previous Mac service dictionary used an NSNumber shortcut for the RFCOMM ser
 A successful baseband callback with `isConnected=NO` no longer advances to SDP: the existing baseband deadline remains active until connected state is confirmed. This fixes misleading phase progression; it does not establish why the physical Mac–Windows connection is failing.
 
 Reported hardware status: macOS26.6.2 with Windows has shown service-search timeouts. Windows Main also reported services=0, but it may have reused a saved peer. To retest the reverse direction on0.3.3: choose **Secondary PC** on Mac, then Windows **Connection tools and diagnostics → Find another secondary PC**. That button clears the saved peer and performs a fresh service search. Share the new Mac **Copy connection diagnostics** and Windows Activity log if no connection is established. This is an isolation test, not a change to the desired final Mac-Main input direction.
+
+## macOS0.3.4: incoming notification and approval handoff
+
+Mac Secondary uses the unfiltered RFCOMM-open notification API and applies strict application-side checks: current listener generation, our published channel ID and incoming direction. Unrelated/outgoing/stale notifications are ignored without changing their delegates or closing their channels. Duplicate notifications do not close the active connection. Additional incoming connections to the occupied service are rejected.
+
+Native driver notifications/data callbacks are marshalled to main before calling application/UI code. The approval dialog brings the app forward and logs presentation/decision. Authenticated input is still gated by paired/authentication/encryption checks plus user approval and Accessibility permission; these requirements were not relaxed.
+
+Frames arriving during approval/engine initialization are buffered in order (max128 frames/512KiB) and released once after the application explicitly starts receiving. Reject/disconnect clears them; overflow disconnects rather than growing memory. This addresses a possible dropped ControlStart/clipboard handshake while the approval dialog is open.
+
+The reported0.3.3 Mac log shows only advertisement records despite Windows-side encrypted connections. It does not prove exactly where the driver notification was lost/ignored. The new path is a compatibility change with clearer stage logs, not a claim of validated radio interoperability. Native mocked tests cover filtering, duplicates, busy/stale notifications, ordered buffering and background-thread dispatch, but do not exercise a real Bluetooth controller or approval UI.
+
+For the next test, quit the old Mac app, replace it in Applications and verify the0.3.4 title. Choose Secondary on Mac, Main on Windows0.3.0, approve on Mac if prompted, then press F8 after approval. If no approval appears, use Copy connection diagnostics. It now includes the current application's Bluetooth authorization status, notification registration/delivery, delegate registration, individual security-check results and approval/engine-ready markers, without logging peer names/addresses or clipboard/input contents.
