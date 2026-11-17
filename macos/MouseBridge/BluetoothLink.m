@@ -70,12 +70,22 @@
  }
  else if(self.opening&&elapsed>=self.openTimeout)[self finishWithError:@"RFCOMM connection timed out. Keep Windows Secondary running and reconnect."];
 }
++ (NSDictionary *)serviceDictionary {
+ // NSNumber shortcuts encode uint32 in Apple's SDP dictionary API. RFCOMM CN must be uint8.
+ NSDictionary *channel=@{@"DataElementType":@1,@"DataElementSize":@1,@"DataElementValue":@3};
+ return @{@"0001 - ServiceClassIDList":@[[self serviceUUID]],
+          @"0004 - ProtocolDescriptorList":@[@[[IOBluetoothSDPUUID uuid16:0x0100]],@[[IOBluetoothSDPUUID uuid16:0x0003],channel]],
+          @"0005 - BrowseGroupList":@[[IOBluetoothSDPUUID uuid16:0x1002]],
+          @"0100 - ServiceName":@"MouseBridge",@"LocalAttributes":@{@"Persistent":@NO}};
+}
 - (void)listen {
  [self stop];self.stopping=NO;
- NSDictionary *dict=@{@"0001 - ServiceClassIDList":@[[MBBluetoothLink serviceUUID]],@"0004 - ProtocolDescriptorList":@[@[[IOBluetoothSDPUUID uuid16:0x0100]],@[[IOBluetoothSDPUUID uuid16:0x0003],@3]],@"0100 - ServiceName":@"MouseBridge",@"LocalAttributes":@{@"Persistent":@NO}};
+ NSDictionary *dict=[MBBluetoothLink serviceDictionary];
  self.record=[IOBluetoothSDPServiceRecord publishedServiceRecordWithDictionary:dict];BluetoothRFCOMMChannelID channel=0;
  if(!self.record||[self.record getRFCOMMChannelID:&channel]!=kIOReturnSuccess){[self report:@"Cannot advertise RFCOMM. Check Bluetooth permission and radio."];[self stop];return;}
  self.notification=[IOBluetoothRFCOMMChannel registerForChannelOpenNotifications:self selector:@selector(opened:channel:) withChannelID:channel direction:kIOBluetoothUserNotificationChannelDirectionIncoming];
+ if(!self.notification){[self finishWithError:@"Cannot register RFCOMM incoming notification. Copy diagnostics."];return;}
+ [self trace:[NSString stringWithFormat:@"SDP service published: channel=%u, channel parameter=uint8, public browse group enabled",(unsigned)channel]];
  [self report:@"Secondary ready. Pair in system Bluetooth settings first."];
 }
 - (void)traceControllerState {

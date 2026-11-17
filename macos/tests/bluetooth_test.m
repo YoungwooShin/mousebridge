@@ -37,6 +37,9 @@
 - (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 - (void)connectionComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
 @end
+@interface MBBluetoothLink(SDPTest)
++ (NSDictionary *)serviceDictionary;
+@end
 @interface MBTestLink:MBBluetoothLink
 @end
 @implementation MBTestLink
@@ -45,6 +48,15 @@
 static MBFakeDevice *device(void){MBFakeDevice *d=[MBFakeDevice new];d.connected=YES;d.addressString=@"00-11-22-33-44-AA";return d;}
 static void spin(double seconds){[[NSRunLoop mainRunLoop]runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];}
 int main(void){@autoreleasepool{
+ // Exercise Apple's actual SDP value parser, without publishing or using a Bluetooth controller.
+ IOBluetoothSDPDataElement *legacy=[IOBluetoothSDPDataElement withElementValue:@3];assert(legacy.getSize==4);
+ NSDictionary *record=[MBBluetoothLink serviceDictionary];
+ IOBluetoothSDPDataElement *protocols=[IOBluetoothSDPDataElement withElementValue:record[@"0004 - ProtocolDescriptorList"]];
+ NSArray *list=protocols.getArrayValue;IOBluetoothSDPDataElement *rfcomm=list[1];IOBluetoothSDPDataElement *parameter=rfcomm.getArrayValue[1];
+ assert(parameter.getTypeDescriptor==1);assert(parameter.getSize==1);assert(parameter.getNumberValue.unsignedIntValue==3);
+ IOBluetoothSDPDataElement *classes=[IOBluetoothSDPDataElement withElementValue:record[@"0001 - ServiceClassIDList"]];assert(classes.getArrayValue.count==1);
+ assert(record[@"0005 - BrowseGroupList"]!=nil);
+ puts("PASS: actual Apple SDP parser confirms RFCOMM uint8 channel (legacy NSNumber was uint32) and browse/class attributes");
  __block NSString *state=@"";MBBluetoothLink *link=[[MBTestLink alloc]initWithDiscoveryTimeout:.04 openTimeout:.04];link.state=^(NSString *s){state=s;};
  MBFakeDevice *d=device();[link connect:(id)d];assert([state containsString:@"Discovering"]);spin(.35);assert([state containsString:@"discovery timed out"]);
  // The callback may supply a different wrapper for the same Bluetooth address.
